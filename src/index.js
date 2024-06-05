@@ -6,6 +6,9 @@ async function main() {
     await sequelize.sync({ force: false });
     await sequelize.authenticate();
     app.listen(3000);
+    app.get("/", (req, res) => {
+      res.send(`ejecutando en el puert0 3000`);
+    });
     console.log("Servidor ejecutando en el puerto 3000");
   } catch (error) {
     console.error("Unable to connect to the database:", error);
