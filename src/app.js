@@ -12,6 +12,28 @@ app.use(cors());
 
 //middlewares
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:42767", // Cambia esto al origen específico en producción
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
+
+// Añadir manualmente encabezados CORS (opcional)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:42767"); // Cambia esto al origen específico en producción
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  );
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(userRoutes);
 app.use("/v1/api/auth", authenticationRoutes);
