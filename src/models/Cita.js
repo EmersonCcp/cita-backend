@@ -1,9 +1,9 @@
 // models/Cita.js
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../database/database.js';
-import {Cliente} from './Cliente.js';
+import { DataTypes } from "sequelize";
+import { sequelize } from "../database/database.js";
+import { Cliente } from "./Cliente.js";
 
-export const Cita = sequelize.define('citas', {
+export const Cita = sequelize.define("citas", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -13,10 +13,10 @@ export const Cita = sequelize.define('citas', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Cliente, 
-      key: 'id', 
+      model: Cliente,
+      key: "id",
     },
-    onDelete: 'RESTRICT',
+    onDelete: "RESTRICT",
   },
   monto: {
     type: DataTypes.INTEGER,
@@ -31,15 +31,14 @@ export const Cita = sequelize.define('citas', {
     allowNull: false,
   },
   estado: {
-    type: DataTypes.ENUM('pendiente', 'completado', 'cancelado'),
+    type: DataTypes.ENUM("pendiente", "completado", "cancelado"),
     allowNull: false,
-    defaultValue: 'pendiente',
+    defaultValue: "pendiente",
   },
   obs: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
-
 
 Cita.sync({ force: false });
