@@ -2,43 +2,53 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Cliente } from "./Cliente.js";
+import { Funcionario } from "./Funcionario.js";
 
 export const Cita = sequelize.define("citas", {
-  id: {
+  cita_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  clienteId: {
+  fk_cliente: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: Cliente,
-      key: "id",
+      key: "cli_codigo",
+    },
+    onDelete: "CASCADE",
+  },
+  fk_funcionario: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Funcionario,
+      key: "fun_codigo",
     },
     onDelete: "RESTRICT",
   },
-  monto: {
+  cita_monto: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  fecha: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  hora: {
+  cita_fecha: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  estado: {
+  cita_hora: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  cita_estado: {
     type: DataTypes.ENUM("pendiente", "completado", "cancelado"),
     allowNull: false,
     defaultValue: "pendiente",
   },
-  obs: {
+  cita_obs: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
 
-Cita.sync({ force: false });
+Cita.sync({ alter: false });

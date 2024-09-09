@@ -31,7 +31,7 @@ export const login = async (req, res) => {
           { id: user.id, email: user.email, username: user.username },
           "holamibro"
         );
-        return res.status(200).json({ ok: true, token });
+        return res.status(200).json({ ok: true, token, user });
       } else {
         return res
           .status(200)

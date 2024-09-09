@@ -1,56 +1,52 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 
-export const Cliente = sequelize.define("clientes", {
-  cli_codigo: {
+export const Funcionario = sequelize.define("funcionarios", {
+  fun_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  cli_nombre: {
+  fun_nombre: {
     type: DataTypes.STRING,
     allowNull: false,
   },
 
-  cli_apellido: {
+  fun_apellido: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_telefono: {
+  fun_telefono: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_documento: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  cli_ruc: {
+  fun_documento: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_sexo: {
+  fun_sexo: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_fecha_nacimiento: {
+  fun_fecha_nacimiento: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_direccion: {
+  fun_direccion: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_email: {
+  fun_email: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
 
-Cliente.sync({ force: false });
+Funcionario.sync({ force: false });

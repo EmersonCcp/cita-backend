@@ -39,3 +39,5 @@ export const User = sequelize.define("users", {
     defaultValue: ["USER"], // Puedes establecer un valor predeterminado como un array vacío
   },
 });
+
+User.sync({ force: false });

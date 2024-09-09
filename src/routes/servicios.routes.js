@@ -1,18 +1,19 @@
 import { Router } from "express";
 import {
+  getServiciosWithSearch,
   getServicio,
   getServicios,
   createServicio,
   updateServicio,
-  deleteServicio
+  deleteServicio,
 } from "../controllers/servicio.controller.js";
 // import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
-
-router.get("/api/servicios", getServicios);
-router.get("/api/servicio/:id", getServicio);
-router.post("/api/servicio", createServicio);
-router.put("/api/servicio/:id", updateServicio);
-router.delete("/api/servicio/:id", deleteServicio);
+router.get("/servicios/:limit/:pagination/:query", getServiciosWithSearch);
+router.get("/servicios", getServicios);
+router.get("/servicios/:id", getServicio);
+router.post("/servicios", createServicio);
+router.put("/servicios/:id", updateServicio);
+router.delete("/servicios/:id", deleteServicio);
 
 export default router;

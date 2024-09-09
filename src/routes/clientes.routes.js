@@ -1,18 +1,20 @@
 import { Router } from "express";
 import {
+  getClientesWithSearch,
   getCliente,
   getClientes,
   createCliente,
   updateCliente,
-  deleteCliente
+  deleteCliente,
 } from "../controllers/cliente.controller.js";
 // import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/api/clientes", getClientes);
-router.get("/api/cliente/:id", getCliente);
-router.post("/api/cliente", createCliente);
-router.put("/api/cliente/:id", updateCliente);
-router.delete("/api/cliente/:id", deleteCliente);
+router.get("/clientes", getClientes);
+router.get("/clientes/:limit/:pagination/:query", getClientesWithSearch);
+router.get("/clientes/:id", getCliente);
+router.post("/clientes", createCliente);
+router.put("/clientes/:id", updateCliente);
+router.delete("/clientes/:id", deleteCliente);
 
 export default router;

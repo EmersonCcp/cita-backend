@@ -4,33 +4,33 @@ import { Cita } from "./Cita.js";
 import { Servicio } from "./Servicio.js";
 
 export const CitaServicio = sequelize.define("citas_servicios", {
-  id: {
+  cs_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  citaId: {
+  fk_cita: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: Cita,
-      key: "id",
+      key: "cita_codigo",
     },
-    onDelete: "RESTRICT",
+    onDelete: "CASCADE",
   },
-  servicioId: {
+  fk_servicio: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: Servicio,
-      key: "id",
+      key: "ser_codigo",
     },
     onDelete: "RESTRICT",
   },
-  monto: {
+  cs_monto: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
 });
 
-CitaServicio.sync({ force: false });
+CitaServicio.sync({ alter: false });

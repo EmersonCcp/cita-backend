@@ -1,56 +1,56 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 
-export const Cliente = sequelize.define("clientes", {
-  cli_codigo: {
+export const Vendedor = sequelize.define("vendedores", {
+  vend_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  cli_nombre: {
+  vend_nombre: {
     type: DataTypes.STRING,
     allowNull: false,
   },
 
-  cli_apellido: {
+  vend_apellido: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_telefono: {
+  vend_telefono: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_documento: {
+  vend_documento: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  cli_ruc: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-
-  cli_sexo: {
+  vend_ruc: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_fecha_nacimiento: {
+  vend_sexo: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_direccion: {
+  vend_fecha_nacimiento: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_email: {
+  vend_direccion: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  vend_email: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
 
-Cliente.sync({ force: false });
+Vendedor.sync({ force: false });

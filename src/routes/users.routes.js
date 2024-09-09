@@ -9,10 +9,10 @@ import {
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/api/users", authenticateToken, getUsers);
-router.get("/api/user/:id", getUser);
-router.post("/api/user", createUser);
-router.put("/api/user/:id", updateUser);
-router.delete("/api/user/:id", authenticateToken, deleteUser);
+router.get("/users/:limit/:pagination/:query", authenticateToken, getUsers);
+router.get("/users/:id", getUser);
+router.post("/users", createUser);
+router.put("/users/:id", updateUser);
+router.delete("/users/:id", authenticateToken, deleteUser);
 
 export default router;

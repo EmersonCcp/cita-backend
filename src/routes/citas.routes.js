@@ -2,19 +2,19 @@ import { Router } from "express";
 import {
   getCita,
   updateEstado,
-  getAllCitas,
+  getAllWithSearch,
   createCita,
   updateCita,
-  deleteCita
+  deleteCita,
 } from "../controllers/cita.controller.js";
 // import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/api/citas", getAllCitas);
-router.get("/api/cita/:id", getCita);
-router.post("/api/cita", createCita);
-router.put("/api/cita/:id", updateCita);
-router.put("/api/cita-estado/:id/:estado", updateEstado);
-router.delete("/api/cita/:id", deleteCita);
+router.get("/citas/:limit/:pagination/:query", getAllWithSearch);
+router.get("/citas/:id", getCita);
+router.post("/citas", createCita);
+router.put("/citas/:id", updateCita);
+router.put("/cita-estado/:id/:estado", updateEstado);
+router.delete("/citas/:id", deleteCita);
 
 export default router;

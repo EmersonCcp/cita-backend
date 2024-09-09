@@ -4,16 +4,15 @@ import {
   getCitaServicio,
   createCitaServicio,
   updateCitaServicio,
-  deleteAllById,
-  deleteCitaServicio
+  deleteCitaServicio,
 } from "../controllers/cita_servicio.controller.js";
 const router = Router();
 
-router.get("/api/citas_servicios/:id", getAllCitasServicios);
-router.get("/api/cita_servicio/:id", getCitaServicio);
-router.post("/api/cita_servicio", createCitaServicio);
-router.put("/api/cita_servicio/:id", updateCitaServicio);
-router.delete("/api/cita_servicios/:id", deleteAllById);
-router.delete("/api/cita_servicio/:id", deleteCitaServicio);
+router.get("/citas_servicios/:id", getAllCitasServicios);
+router.get("/citas_servicios/:id", getCitaServicio);
+router.post("/citas_servicios", createCitaServicio);
+router.put("/citas_servicios/:id", updateCitaServicio);
+router.delete("/citas_servicios/:id", deleteCitaServicio);
+// router.delete("/citas_servicios/:id", deleteCitaServicio);
 
 export default router;
