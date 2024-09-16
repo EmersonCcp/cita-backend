@@ -27,7 +27,7 @@ export const Compra = sequelize.define(
         model: Proveedor,
         key: "prov_codigo",
       },
-      onDelete: "CASCADE",
+      onDelete: "RESTRICT",
     },
     com_factura: {
       type: DataTypes.STRING,
@@ -39,4 +39,4 @@ export const Compra = sequelize.define(
   }
 );
 
-Compra.sync({ force: false });
+Compra.sync({ alter: false });

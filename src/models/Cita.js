@@ -17,7 +17,7 @@ export const Cita = sequelize.define("citas", {
       model: Cliente,
       key: "cli_codigo",
     },
-    onDelete: "CASCADE",
+    onDelete: "RESTRICT",
   },
   fk_funcionario: {
     type: DataTypes.INTEGER,

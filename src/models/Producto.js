@@ -19,6 +19,14 @@ export const Producto = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    imgUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    imgKey: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     prod_cantidad: {
       type: DataTypes.FLOAT,
       allowNull: false,

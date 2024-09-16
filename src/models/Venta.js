@@ -27,7 +27,7 @@ export const Venta = sequelize.define("ventas", {
       model: Cliente,
       key: "cli_codigo",
     },
-    onDelete: "CASCADE",
+    onDelete: "RESTRICT",
   },
 
   fk_funcionario: {

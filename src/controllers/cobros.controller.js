@@ -10,9 +10,11 @@ export const getCobrosWithSearch = async (req, res) => {
     let queryAdd = ``;
     if (query !== ":query") {
       const searchableFields = [
-        "cliente",
-        "p.prov_nombre",
+        "c2.cli_apellido",
+        "c2.cli_nombre",
         "c.cob_monto_total",
+        "c.cob_estado",
+        "c.cob_fecha",
       ];
       const conditions = searchableFields
         .map((field) => {

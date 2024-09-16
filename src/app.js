@@ -1,4 +1,4 @@
-import express from "express";
+//routes
 import userRoutes from "./routes/users.routes.js";
 import authenticationRoutes from "./routes/authentication.routes.js";
 import clienteRoutes from "./routes/clientes.routes.js";
@@ -16,22 +16,58 @@ import cuotasRoutes from "./routes/cuotas.routes.js";
 import sqlExecuteRoutes from "./routes/sql_execute.routes.js";
 import funcionariosRoutes from "./routes/funcionarios.routes.js";
 import vendedoresRoutes from "./routes/vendedores.routes.js";
-
+import notificacionesRoutes from "./routes/notificaciones.routes.js";
+//library
+import express from "express";
+import http from "http";
+import { Server as WebSocketServer } from "socket.io";
 import cors from "cors";
 
+//cronjob
+import "./cronjobs/citasNotification.js";
+// import "./cronjobs/cumpleClientes.js";
+
+//middleware
+import logger from "./middleware/logger.js";
+
 const app = express();
+
+export const server = http.createServer(app);
+
+const io = new WebSocketServer(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
 app.use(cors());
+app.use(logger);
+app.get("/serve", (req, res) => {
+  res.send("¡El servidor está funcionando correctamente!");
+});
+
+let socketID;
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+  socketID = socket.id;
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
+
+// Ejemplo de enviar notificación
+export const sendNotification = (message) => {
+  io.emit("nuevaNotificacion", message);
+};
+
+export const updateListProyectos = (message) => {
+  io.emit("updateListProyectos", socketID);
+};
 
 //middlewares
 app.use(express.json());
-app.use(
-  cors({
-    // origin: "http://localhost:42767",
-    // methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    // preflightContinue: false,
-    // optionsSuccessStatus: 204,
-  })
-);
+app.use(cors());
 
 // Añadir manualmente encabezados CORS (opcional)
 // app.use((req, res, next) => {
@@ -64,5 +100,7 @@ app.use("/v1/api", cuotasRoutes);
 app.use("/v1/api", sqlExecuteRoutes);
 app.use("/v1/api", funcionariosRoutes);
 app.use("/v1/api", vendedoresRoutes);
+app.use("/v1/api", notificacionesRoutes);
 
 export default app;
+export { io };
