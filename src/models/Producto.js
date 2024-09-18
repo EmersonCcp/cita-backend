@@ -32,6 +32,11 @@ export const Producto = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    prod_cantidad_minima: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
+    },
     prod_precio_compra: {
       type: DataTypes.FLOAT,
       allowNull: false,
