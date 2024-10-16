@@ -1,7 +1,21 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 
-const rolesEnum = ["ADMIN", "USER", "VENDEDOR"];
+const rolesEnum = [
+  "ADMIN",
+  "CLIENTES",
+  "FUNCIONARIOS",
+  "SERVICIOS",
+  "CITAS",
+  "PROVEEDORES",
+  "PRODUCTOS",
+  "COMPRAS",
+  "VENTAS",
+  "COBROS",
+  "EXPORTACIONES",
+  "DASHBOARD",
+  "USER",
+];
 
 export const User = sequelize.define("users", {
   id: {
@@ -36,7 +50,7 @@ export const User = sequelize.define("users", {
   roles: {
     type: DataTypes.ARRAY(DataTypes.ENUM(...rolesEnum)),
     allowNull: true,
-    defaultValue: ["USER"], // Puedes establecer un valor predeterminado como un array vacío
+    defaultValue: ["DASHBOARD"],
   },
 });
 

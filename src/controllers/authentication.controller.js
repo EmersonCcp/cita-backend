@@ -24,11 +24,18 @@ export const login = async (req, res) => {
     });
 
     if (user) {
+      console.log(user.roles);
+
       const passwordValid = await bcrypt.compare(password, user.password);
 
       if (passwordValid) {
         const token = jwt.sign(
-          { id: user.id, email: user.email, username: user.username },
+          {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            roles: user.roles,
+          },
           "holamibro"
         );
         return res.status(200).json({ ok: true, token, user });
