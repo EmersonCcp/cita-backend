@@ -122,3 +122,42 @@ export const authenticateToken = (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { id } = req.params; // ID del usuario pasado por la URL
+    const { password, newPassword } = req.body; // Contraseña actual y nueva contraseña
+
+    // Buscar al usuario por ID
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ ok: false, message: "Usuario no encontrado." });
+    }
+
+    // Comparar la contraseña actual con la almacenada en la base de datos
+    const passwordValid = await bcrypt.compare(password, user.password);
+
+    if (!passwordValid) {
+      return res
+        .status(200)
+        .json({ ok: false, message: "La contraseña actual es incorrecta." });
+    }
+
+    // Si la contraseña actual es válida, encriptar la nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    // Actualizar la contraseña en la base de datos
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res
+      .status(200)
+      .json({ ok: true, message: "Contraseña actualizada correctamente." });
+  } catch (error) {
+    res.status(200).json({ ok: false, message: error.message });
+  }
+};
