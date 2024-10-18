@@ -13,72 +13,76 @@ const formatDate = (date) => {
   return date.toISOString().split("T")[0];
 };
 
-const scheduleCitaNotification = () => {
-  cron.schedule("*/10 * * * * *", async () => {
-    console.log(`Cron job ejecutado: Verificando citas próximas a vencer...`);
+cron.schedule("*/30 * * * * *", () => {
+  console.log("Tarea ejecutada cada una hora, Verifica el Estado del Titular");
+});
 
-    try {
-      // Fecha actual
-      const currentDate = moment()
-        .tz("America/Asuncion")
-        .startOf("day")
-        .toDate();
-      // Fecha objetivo: un día después
-      const targetDate = new Date(currentDate);
-      targetDate.setDate(currentDate.getDate() + 1);
+// const scheduleCitaNotification = () => {
+//   cron.schedule("*/10 * * * * *", async () => {
+//     console.log(`Cron job ejecutado: Verificando citas próximas a vencer...`);
 
-      const targetDateString = formatDate(targetDate);
+//     try {
+//       // Fecha actual
+//       const currentDate = moment()
+//         .tz("America/Asuncion")
+//         .startOf("day")
+//         .toDate();
+//       // Fecha objetivo: un día después
+//       const targetDate = new Date(currentDate);
+//       targetDate.setDate(currentDate.getDate() + 1);
 
-      // Obtener todas las citas cuya fecha es igual a la fecha objetivo
-      const citas = await Cita.findAll({
-        where: Sequelize.where(
-          Sequelize.fn("DATE", Sequelize.col("cita_fecha")),
-          targetDateString
-        ),
-      });
+//       const targetDateString = formatDate(targetDate);
 
-      // Iterar sobre las citas y enviar notificaciones
-      for (const cita of citas) {
-        const citaData = cita.get();
+//       // Obtener todas las citas cuya fecha es igual a la fecha objetivo
+//       const citas = await Cita.findAll({
+//         where: Sequelize.where(
+//           Sequelize.fn("DATE", Sequelize.col("cita_fecha")),
+//           targetDateString
+//         ),
+//       });
 
-        let cliente = await Cliente.findOne({
-          where: { cli_codigo: citaData.fk_cliente },
-        });
+//       // Iterar sobre las citas y enviar notificaciones
+//       for (const cita of citas) {
+//         const citaData = cita.get();
 
-        const clienteData = cliente.get();
+//         let cliente = await Cliente.findOne({
+//           where: { cli_codigo: citaData.fk_cliente },
+//         });
 
-        let funcionario = await Funcionario.findOne({
-          where: { fun_codigo: citaData.fk_funcionario },
-        });
+//         const clienteData = cliente.get();
 
-        const funcionarioData = funcionario.get();
+//         let funcionario = await Funcionario.findOne({
+//           where: { fun_codigo: citaData.fk_funcionario },
+//         });
 
-        const clienteNombre = `${clienteData.cli_nombre} ${clienteData.cli_apellido}`;
-        const funcionarioNombre = `${funcionarioData.fun_nombre} ${funcionarioData.fun_apellido}`;
+//         const funcionarioData = funcionario.get();
 
-        const mensaje = `Recordatorio: ${funcionarioNombre}, Tienes una cita con ${clienteNombre} el ${citaData.cita_fecha} a las ${citaData.cita_hora}.`;
+//         const clienteNombre = `${clienteData.cli_nombre} ${clienteData.cli_apellido}`;
+//         const funcionarioNombre = `${funcionarioData.fun_nombre} ${funcionarioData.fun_apellido}`;
 
-        // Crear una notificación
-        let notificacion = await Notificacion.create({
-          noti_mensaje: mensaje,
-          noti_visto: false,
-        //   cita_codigo: cita.cita_codigo,
-          noti_rango: 0,
-        });
+//         const mensaje = `Recordatorio: ${funcionarioNombre}, Tienes una cita con ${clienteNombre} el ${citaData.cita_fecha} a las ${citaData.cita_hora}.`;
 
-        // Aquí puedes implementar la función para enviar notificaciones, ya sea por correo o push
-        sendNotification(notificacion);
+//         // Crear una notificación
+//         let notificacion = await Notificacion.create({
+//           noti_mensaje: mensaje,
+//           noti_visto: false,
+//           //   cita_codigo: cita.cita_codigo,
+//           noti_rango: 0,
+//         });
 
-        // console.log(
-        //   `---------Notificación creada para la cita con ${clienteNombre} el ${fechaCita} a las ${horaCita}---------`
-        // );
-      }
+//         // Aquí puedes implementar la función para enviar notificaciones, ya sea por correo o push
+//         sendNotification(notificacion);
 
-      console.log("Verificación de citas completada.");
-    } catch (error) {
-      console.error("Error al verificar citas próximas:", error);
-    }
-  });
-};
+//         // console.log(
+//         //   `---------Notificación creada para la cita con ${clienteNombre} el ${fechaCita} a las ${horaCita}---------`
+//         // );
+//       }
+
+//       console.log("Verificación de citas completada.");
+//     } catch (error) {
+//       console.error("Error al verificar citas próximas:", error);
+//     }
+//   });
+// };
 
 // scheduleCitaNotification();
