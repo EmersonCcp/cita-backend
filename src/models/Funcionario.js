@@ -38,6 +38,22 @@ export const Funcionario = sequelize.define("funcionarios", {
     allowNull: true,
   },
 
+  fun_fecha_cobro: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  fun_fecha_ingreso: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  fun_salario: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
+  },
+
   fun_direccion: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -49,4 +65,4 @@ export const Funcionario = sequelize.define("funcionarios", {
   },
 });
 
-Funcionario.sync({ force: false });
+Funcionario.sync({ alter: false });

@@ -7,17 +7,18 @@ import {
   updateFuncionario,
   deleteFuncionario,
 } from "../controllers/funcionarios.controller.js";
-// import { authenticateToken } from "../middleware/authMiddleware.js";
+import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/funcionarios", getFuncionarios);
+router.get("/funcionarios", authenticateToken, getFuncionarios);
 router.get(
   "/funcionarios/:limit/:pagination/:query",
+  authenticateToken,
   getFuncionariosWithSearch
 );
-router.get("/funcionarios/:id", getFuncionario);
-router.post("/funcionarios", createFuncionario);
-router.put("/funcionarios/:id", updateFuncionario);
-router.delete("/funcionarios/:id", deleteFuncionario);
+router.get("/funcionarios/:id", authenticateToken, getFuncionario);
+router.post("/funcionarios", authenticateToken, createFuncionario);
+router.put("/funcionarios/:id", authenticateToken, updateFuncionario);
+router.delete("/funcionarios/:id", authenticateToken, deleteFuncionario);
 
 export default router;

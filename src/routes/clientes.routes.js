@@ -7,14 +7,18 @@ import {
   updateCliente,
   deleteCliente,
 } from "../controllers/cliente.controller.js";
-// import { authenticateToken } from "../middleware/authMiddleware.js";
+import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/clientes", getClientes);
-router.get("/clientes/:limit/:pagination/:query", getClientesWithSearch);
-router.get("/clientes/:id", getCliente);
-router.post("/clientes", createCliente);
-router.put("/clientes/:id", updateCliente);
-router.delete("/clientes/:id", deleteCliente);
+router.get("/clientes", authenticateToken, getClientes);
+router.get(
+  "/clientes/:limit/:pagination/:query",
+  authenticateToken,
+  getClientesWithSearch
+);
+router.get("/clientes/:id", authenticateToken, getCliente);
+router.post("/clientes", authenticateToken, createCliente);
+router.put("/clientes/:id", authenticateToken, updateCliente);
+router.delete("/clientes/:id", authenticateToken, deleteCliente);
 
 export default router;

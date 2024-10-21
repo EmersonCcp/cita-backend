@@ -6,14 +6,14 @@ import {
   updateVenta,
   deleteVenta,
 } from "../controllers/ventas.controller.js";
-// import { authenticateToken } from "../middleware/authMiddleware.js";
+import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
 // router.get("/ventas", getventas);
-router.get("/ventas/:limit/:pagination/:query", getVentas);
-router.get("/ventas/:id", getVenta);
-router.post("/ventas", createVenta);
-router.put("/ventas/:id", updateVenta);
-router.delete("/ventas/:id", deleteVenta);
+router.get("/ventas/:limit/:pagination/:query", authenticateToken, getVentas);
+router.get("/ventas/:id", authenticateToken, getVenta);
+router.post("/ventas", authenticateToken, createVenta);
+router.put("/ventas/:id", authenticateToken, updateVenta);
+router.delete("/ventas/:id", authenticateToken, deleteVenta);
 
 export default router;

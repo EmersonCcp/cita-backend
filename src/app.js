@@ -17,6 +17,10 @@ import sqlExecuteRoutes from "./routes/sql_execute.routes.js";
 import funcionariosRoutes from "./routes/funcionarios.routes.js";
 import vendedoresRoutes from "./routes/vendedores.routes.js";
 import notificacionesRoutes from "./routes/notificaciones.routes.js";
+import pagosRoutes from "./routes/pagos.routes.js";
+import valesRoutes from "./routes/vales.routes.js";
+import horaExtraRoutes from "./routes/hora_extra.routes.js";
+
 //library
 import express from "express";
 import http from "http";
@@ -24,7 +28,7 @@ import { Server as WebSocketServer } from "socket.io";
 import cors from "cors";
 
 //cronjob
-import "./cronjobs/citasNotification.js";
+// import "./cronjobs/citasNotification.js";
 // import "./cronjobs/cumpleClientes.js";
 
 //middleware
@@ -69,20 +73,6 @@ export const updateListProyectos = (message) => {
 app.use(express.json());
 app.use(cors());
 
-// Añadir manualmente encabezados CORS (opcional)
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "http://localhost:4200"); // Cambia esto al origen específico en producción
-//   res.header(
-//     "Access-Control-Allow-Methods",
-//     "GET,PUT,POST,DELETE,PATCH,OPTIONS"
-//   );
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   if (req.method === "OPTIONS") {
-//     return res.status(200).end();
-//   }
-//   next();
-// });
-
 app.use("/v1/api", userRoutes);
 app.use("/v1/api/auth", authenticationRoutes);
 app.use("/v1/api", clienteRoutes);
@@ -101,6 +91,9 @@ app.use("/v1/api", sqlExecuteRoutes);
 app.use("/v1/api", funcionariosRoutes);
 app.use("/v1/api", vendedoresRoutes);
 app.use("/v1/api", notificacionesRoutes);
+app.use("/v1/api", pagosRoutes);
+app.use("/v1/api", valesRoutes);
+app.use("/v1/api", horaExtraRoutes);
 
 export default app;
 export { io };
