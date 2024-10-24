@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Funcionario } from "./Funcionario.js";
+import { Empresa } from "./Empresa.js";
 
 export const Vale = sequelize.define("vale", {
   //vale para los funcionarios
@@ -41,6 +42,15 @@ export const Vale = sequelize.define("vale", {
     allowNull: false,
     defaultValue: "pendiente",
   },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-Vale.sync({ alter: false });
+Vale.sync({ force: false });

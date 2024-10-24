@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Venta } from "./Venta.js";
+import { Empresa } from "./Empresa.js";
 
 export const Cobro = sequelize.define("cobros", {
   cob_codigo: {
@@ -39,6 +40,16 @@ export const Cobro = sequelize.define("cobros", {
     },
     onDelete: "CASCADE",
   },
+
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-Cobro.sync({ alter: false });
+Cobro.sync({ force: false });

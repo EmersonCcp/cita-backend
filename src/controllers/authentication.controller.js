@@ -35,6 +35,7 @@ export const login = async (req, res) => {
             email: user.email,
             username: user.username,
             roles: user.roles,
+            fk_empresa: user.fk_empresa,
           },
           "holamibro"
         );
@@ -56,7 +57,7 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, fk_empresa } = req.body;
 
     // Verificar si el username o el email ya existen
     const existingUser = await User.findOne({
@@ -94,6 +95,7 @@ export const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      fk_empresa,
     });
 
     res.json({ ok: true, newUser });

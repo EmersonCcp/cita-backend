@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Cliente } from "./Cliente.js";
 import { Funcionario } from "./Funcionario.js";
+import { Empresa } from "./Empresa.js";
 
 export const Venta = sequelize.define("ventas", {
   ven_codigo: {
@@ -79,6 +80,16 @@ export const Venta = sequelize.define("ventas", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-Venta.sync({ alter: false });
+Venta.sync({ force: false });

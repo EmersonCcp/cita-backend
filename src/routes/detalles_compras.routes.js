@@ -8,13 +8,21 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.get(
-  "/detalles_compras/:compraId",
+  "/detalles_compras/:fk_empresa/:compraId",
   authenticateToken,
   getDetallesByCompraId
 );
 // router.get("/compras/:id", getCompra);
-router.post("/detalles_compras", authenticateToken, saveOrUpdateDetallesCompra);
+router.post(
+  "/detalles_compras/:fk_empresa",
+  authenticateToken,
+  saveOrUpdateDetallesCompra
+);
 // router.put("/compras/:id", updateCompra);
-router.delete("/detalles_compras/:id", authenticateToken, deleteDetalleCompra);
+router.delete(
+  "/detalles_compras/:fk_empresa/:id",
+  authenticateToken,
+  deleteDetalleCompra
+);
 
 export default router;

@@ -1,66 +1,61 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
-import { Empresa } from "./Empresa.js";
+import { Plan } from "../models/Plan.js";
 
-export const Cliente = sequelize.define("clientes", {
-  cli_codigo: {
+//servira para guarda datos para categoria_gasto y categoria_material
+
+export const Empresa = sequelize.define("empresas", {
+  emp_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  cli_nombre: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-
-  cli_apellido: {
+  emp_nombre: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_telefono: {
+  emp_descripcion: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_documento: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  cli_ruc: {
+  emp_pais: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_sexo: {
+  emp_ciudad: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_fecha_nacimiento: {
+  emp_telefono: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_direccion: {
+  emp_estado: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
+
+  emp_email: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  cli_email: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  fk_empresa: {
+  fk_plan: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
-      model: Empresa,
-      key: "emp_codigo",
+      model: Plan,
+      key: "plan_codigo",
     },
     onDelete: "RESTRICT",
   },
 });
 
-Cliente.sync({ force: false });
+Empresa.sync({ alter: false });

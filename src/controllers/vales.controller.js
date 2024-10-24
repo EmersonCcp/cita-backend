@@ -14,14 +14,24 @@ const searchableFields = [
   "v.vale_descripcion",
   "v.vale_fecha",
   "v.vale_estado",
+  "f.fun_nombre",
+  "f.fun_apellido",
 ];
 
 export const getAllWithSearch = async (req, res) => {
   try {
-    const { limit, pagination, query } = req.params;
+    const { limit, pagination, query, fk_empresa } = req.params; // Asegúrate de obtener fk_empresa
 
     let queryAdd = ``;
     if (query && query !== ":query") {
+      const searchableFields = [
+        "v.vale_codigo",
+        "f.fun_nombre",
+        "f.fun_apellido",
+        "v.vale_fecha",
+        "v.vale_estado",
+        "v.vale_monto",
+      ];
       const conditions = searchableFields
         .map((field) => {
           return `${field}::VARCHAR ILIKE '%${query}%'`;
@@ -31,24 +41,36 @@ export const getAllWithSearch = async (req, res) => {
       queryAdd = `WHERE (${conditions})`;
     }
 
+    // Agrega la condición para fk_empresa
+    let empresaCondition = ``;
+    if (fk_empresa) {
+      empresaCondition = queryAdd
+        ? `AND v.fk_empresa = :fk_empresa`
+        : `WHERE v.fk_empresa = :fk_empresa`;
+    }
+
     const sql = `
-        SELECT 
-          v.vale_codigo,
-          f.fun_codigo AS fk_funcionario,
-          CONCAT(f.fun_nombre, ' ', f.fun_apellido) AS funcionario,
-          v.vale_fecha AS fecha,
-          v.vale_estado AS estado,
-          v.vale_monto AS monto
-        FROM  vales v
-        INNER JOIN funcionarios f ON v.fk_funcionario = f.fun_codigo
-        ${queryAdd}
-        ORDER BY  v.vale_fecha ASC
-        LIMIT ${limit}
-        OFFSET ${pagination}
-      `;
+      SELECT 
+        v.vale_codigo,
+        f.fun_codigo AS fk_funcionario,
+        CONCAT(f.fun_nombre, ' ', f.fun_apellido) AS funcionario,
+        v.vale_fecha AS fecha,
+        v.vale_estado AS estado,
+        v.vale_monto AS monto
+      FROM 
+        vales v
+      INNER JOIN 
+        funcionarios f ON v.fk_funcionario = f.fun_codigo
+      ${queryAdd} ${empresaCondition}
+      ORDER BY 
+        v.vale_fecha ASC
+      LIMIT ${limit}
+      OFFSET ${pagination}
+    `;
 
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
+      replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
 
     res.status(200).json({ ok: true, items });

@@ -11,7 +11,7 @@ import { sequelize } from "../database/database.js";
 
 export const getCompras = async (req, res) => {
   try {
-    const { limit, pagination, query } = req.params;
+    const { limit, pagination, query, fk_empresa } = req.params;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -29,6 +29,14 @@ export const getCompras = async (req, res) => {
       queryAdd = `WHERE (${conditions})`;
     }
 
+    // Agrega la condición para fk_empresa
+    let empresaCondition = ``;
+    if (fk_empresa) {
+      empresaCondition = queryAdd
+        ? `AND c.fk_empresa = :fk_empresa`
+        : `WHERE c.fk_empresa = :fk_empresa`;
+    }
+
     let sql = `
       SELECT 
           c.com_codigo,
@@ -40,7 +48,7 @@ export const getCompras = async (req, res) => {
           compras c
       JOIN 
           proveedores p ON c.fk_proveedor = p.prov_codigo
-      ${queryAdd}
+      ${queryAdd} ${empresaCondition}
       ORDER BY c.com_codigo ASC
       LIMIT ${limit}
       OFFSET ${pagination}
@@ -48,6 +56,7 @@ export const getCompras = async (req, res) => {
 
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
+      replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
 
     res.status(200).json({ ok: true, items });

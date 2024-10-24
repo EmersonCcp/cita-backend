@@ -15,11 +15,12 @@ import cobrosRoutes from "./routes/cobros.routes.js";
 import cuotasRoutes from "./routes/cuotas.routes.js";
 import sqlExecuteRoutes from "./routes/sql_execute.routes.js";
 import funcionariosRoutes from "./routes/funcionarios.routes.js";
-import vendedoresRoutes from "./routes/vendedores.routes.js";
 import notificacionesRoutes from "./routes/notificaciones.routes.js";
 import pagosRoutes from "./routes/pagos.routes.js";
 import valesRoutes from "./routes/vales.routes.js";
 import horaExtraRoutes from "./routes/hora_extra.routes.js";
+import planesRoutes from "./routes/planes.routes.js";
+import empresasRoutes from "./routes/empresas.routes.js";
 
 //library
 import express from "express";
@@ -73,27 +74,28 @@ export const updateListProyectos = (message) => {
 app.use(express.json());
 app.use(cors());
 
-app.use("/v1/api", userRoutes);
 app.use("/v1/api/auth", authenticationRoutes);
-app.use("/v1/api", clienteRoutes);
-app.use("/v1/api", servicioRoutes);
 app.use("/v1/api", citaRoutes);
 app.use("/v1/api", citaServicioRoutes);
+app.use("/v1/api", ventasRoutes);
+app.use("/v1/api", valesRoutes);
+app.use("/v1/api", userRoutes);
+app.use("/v1/api", sqlExecuteRoutes);
+app.use("/v1/api", servicioRoutes);
 app.use("/v1/api", proveedoresRoutes);
 app.use("/v1/api", productosRoutes);
-app.use("/v1/api", comprasRoutes);
-app.use("/v1/api", detallesComprasRoutes);
-app.use("/v1/api", ventasRoutes);
-app.use("/v1/api", detallesVentasRoutes);
-app.use("/v1/api", cobrosRoutes);
-app.use("/v1/api", cuotasRoutes);
-app.use("/v1/api", sqlExecuteRoutes);
-app.use("/v1/api", funcionariosRoutes);
-app.use("/v1/api", vendedoresRoutes);
-app.use("/v1/api", notificacionesRoutes);
+app.use("/v1/api", planesRoutes);
 app.use("/v1/api", pagosRoutes);
-app.use("/v1/api", valesRoutes);
+app.use("/v1/api", notificacionesRoutes);
 app.use("/v1/api", horaExtraRoutes);
+app.use("/v1/api", funcionariosRoutes);
+app.use("/v1/api", empresasRoutes);
+app.use("/v1/api", detallesVentasRoutes);
+app.use("/v1/api", detallesComprasRoutes);
+app.use("/v1/api", cuotasRoutes);
+app.use("/v1/api", comprasRoutes);
+app.use("/v1/api", cobrosRoutes);
+app.use("/v1/api", clienteRoutes);
 
 export default app;
 export { io };

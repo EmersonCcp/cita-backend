@@ -18,7 +18,7 @@ import { sequelize } from "../database/database.js";
 
 export const getVentas = async (req, res) => {
   try {
-    const { limit, pagination, query } = req.params;
+    const { limit, pagination, query, fk_empresa } = req.params;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -37,18 +37,26 @@ export const getVentas = async (req, res) => {
       queryAdd = `WHERE (${conditions})`;
     }
 
+    // Agrega la condición para fk_empresa
+    let empresaCondition = ``;
+    if (fk_empresa) {
+      empresaCondition = queryAdd
+        ? `AND v.fk_empresa = :fk_empresa`
+        : `WHERE v.fk_empresa = :fk_empresa`;
+    }
+
     let sql = `
-      select 
+      SELECT 
         v.ven_codigo,
         v.ven_precio_total,
         v.ven_fecha,
         v.ven_factura,
-        concat(c.cli_nombre, ' ', c.cli_apellido) as cliente
-      from 
+        CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cliente
+      FROM 
         ventas v
-      join
-        clientes c on v.fk_cliente = c.cli_codigo 
-      ${queryAdd}
+      JOIN 
+        clientes c ON v.fk_cliente = c.cli_codigo
+      ${queryAdd} ${empresaCondition}
       ORDER BY v.ven_fecha ASC
       LIMIT ${limit}
       OFFSET ${pagination}
@@ -56,6 +64,7 @@ export const getVentas = async (req, res) => {
 
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
+      replacements: { fk_empresa }, // Pasar el valor de fk_empresa como reemplazo
     });
 
     res.status(200).json({ ok: true, items });

@@ -4,7 +4,11 @@ import { sequelize } from "../database/database.js";
 
 export const getAll = (Model) => async (req, res) => {
   try {
-    const items = await Model.findAll({ limit: 10 });
+    const { fk_empresa } = req.params; // Suponiendo que lo pasas en los parámetros
+    const items = await Model.findAll({
+      where: { fk_empresa },
+      limit: 10,
+    });
     res.json({ ok: true, items });
   } catch (error) {
     errorHandler(res, error);
@@ -14,9 +18,9 @@ export const getAll = (Model) => async (req, res) => {
 export const getAllWithSearch =
   (tableName, searchableFields, orderBy) => async (req, res) => {
     try {
-      const { limit, pagination, query } = req.params;
+      const { limit, pagination, query, fk_empresa } = req.params;
 
-      let queryAdd = ``;
+      let queryAdd = `WHERE fk_empresa = ${fk_empresa} `; // Filtra por fk_empresa
       if (query !== ":query") {
         const conditions = searchableFields
           .map((field) => {
@@ -24,7 +28,7 @@ export const getAllWithSearch =
           })
           .join(" OR ");
 
-        queryAdd = `WHERE (${conditions})`;
+        queryAdd += `AND (${conditions})`;
       }
 
       let sql = `
@@ -47,8 +51,10 @@ export const getAllWithSearch =
 
 export const getOne = (Model, idField) => async (req, res) => {
   try {
-    const { id } = req.params;
-    const item = await Model.findOne({ where: { [idField]: id } });
+    const { id, fk_empresa } = req.params;
+    const item = await Model.findOne({
+      where: { [idField]: id, fk_empresa },
+    });
     if (!item) {
       return res.status(404).json({ message: "Record not found" });
     }
@@ -60,7 +66,8 @@ export const getOne = (Model, idField) => async (req, res) => {
 
 export const create = (Model) => async (req, res) => {
   try {
-    const item = await Model.create(req.body);
+    const { fk_empresa } = req.params; // O extraer desde req.body si es parte de los datos
+    const item = await Model.create({ ...req.body, fk_empresa });
     res.json({ ok: true, item });
   } catch (error) {
     errorHandler(res, error);
@@ -69,14 +76,16 @@ export const create = (Model) => async (req, res) => {
 
 export const update = (Model, idField) => async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id, fk_empresa } = req.params;
     const [updated] = await Model.update(req.body, {
-      where: { [idField]: id },
+      where: { [idField]: id, fk_empresa }, // Filtro por empresa y id
     });
     if (!updated) {
       return res.status(404).json({ message: "Record not found" });
     }
-    const item = await Model.findOne({ where: { [idField]: id } });
+    const item = await Model.findOne({
+      where: { [idField]: id, fk_empresa },
+    });
     res.json({ ok: true, item });
   } catch (error) {
     errorHandler(res, error);
@@ -85,10 +94,10 @@ export const update = (Model, idField) => async (req, res) => {
 
 export const remove = (Model, idField) => async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log(id);
-
-    const deleted = await Model.destroy({ where: { [idField]: id } });
+    const { id, fk_empresa } = req.params;
+    const deleted = await Model.destroy({
+      where: { [idField]: id, fk_empresa }, // Filtro por empresa y id
+    });
     if (!deleted) {
       return res.status(404).json({ message: "Record not found" });
     }

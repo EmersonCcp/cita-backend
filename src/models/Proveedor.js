@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
+import { Empresa } from "./Empresa.js";
 
 export const Proveedor = sequelize.define(
   "proveedores",
@@ -28,6 +29,15 @@ export const Proveedor = sequelize.define(
     prov_email: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    fk_empresa: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Empresa,
+        key: "emp_codigo",
+      },
+      onDelete: "RESTRICT",
     },
   },
   {

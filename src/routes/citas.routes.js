@@ -11,14 +11,18 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.get(
-  "/citas/:limit/:pagination/:query",
+  "/citas/:fk_empresa/:limit/:pagination/:query",
   authenticateToken,
   getAllWithSearch
 );
-router.get("/citas/:id", authenticateToken, getCita);
-router.post("/citas", authenticateToken, createCita);
-router.put("/citas/:id", authenticateToken, updateCita);
-router.put("/cita-estado/:id/:estado", authenticateToken, updateEstado);
-router.delete("/citas/:id", authenticateToken, deleteCita);
+router.get("/citas/:fk_empresa/:id", authenticateToken, getCita);
+router.post("/citas/:fk_empresa", authenticateToken, createCita);
+router.put("/citas/:fk_empresa/:id", authenticateToken, updateCita);
+router.put(
+  "/cita-estado/:fk_empresa/:id/:estado",
+  authenticateToken,
+  updateEstado
+);
+router.delete("/citas/:fk_empresa/:id", authenticateToken, deleteCita);
 
 export default router;

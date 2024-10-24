@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Cita } from "./Cita.js";
 import { Servicio } from "./Servicio.js";
+import { Empresa } from "./Empresa.js";
 
 export const CitaServicio = sequelize.define("citas_servicios", {
   cs_codigo: {
@@ -31,6 +32,15 @@ export const CitaServicio = sequelize.define("citas_servicios", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-CitaServicio.sync({ alter: false });
+CitaServicio.sync({ force: false });

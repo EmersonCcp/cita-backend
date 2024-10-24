@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
+import { Empresa } from "./Empresa.js";
 // import { Proyecto } from "./Proyecto.js"; // Importa Proyecto aquí
 
 export const Notificacion = sequelize.define("notificaciones", {
@@ -20,6 +21,15 @@ export const Notificacion = sequelize.define("notificaciones", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
+  },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
   },
 });
 

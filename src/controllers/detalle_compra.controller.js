@@ -9,6 +9,7 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
 
   try {
     const { compraId, detalles } = req.body;
+    const { fk_empresa } = req.params;
 
     // Validar si la compra existe
     const compra = await Compra.findByPk(compraId, { transaction });
@@ -35,6 +36,7 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
               fk_producto,
               dc_cantidad,
               dc_precio_unitario,
+              fk_empresa,
             },
             { transaction }
           );
@@ -47,6 +49,7 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
             fk_producto,
             dc_cantidad,
             dc_precio_unitario,
+            fk_empresa,
           },
           { transaction }
         );

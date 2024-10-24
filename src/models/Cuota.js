@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Venta } from "../models/Venta.js";
+import { Empresa } from "./Empresa.js";
 
 //servira para guarda datos para categoria_gasto y categoria_material
 
@@ -43,6 +44,15 @@ export const Cuota = sequelize.define(
       //pendiente, pagado
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    fk_empresa: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Empresa,
+        key: "emp_codigo",
+      },
+      onDelete: "RESTRICT",
     },
   },
   {

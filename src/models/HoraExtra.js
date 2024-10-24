@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Funcionario } from "./Funcionario.js";
+import { Empresa } from "./Empresa.js";
 
 export const HoraExtra = sequelize.define("horas_extra", {
   //hora extra para los funcionarios
@@ -51,6 +52,15 @@ export const HoraExtra = sequelize.define("horas_extra", {
     allowNull: false,
     defaultValue: "pendiente",
   },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-HoraExtra.sync({ alter: true });
+HoraExtra.sync({ force: false });

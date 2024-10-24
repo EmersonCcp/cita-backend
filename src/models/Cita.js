@@ -3,6 +3,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Cliente } from "./Cliente.js";
 import { Funcionario } from "./Funcionario.js";
+import { Empresa } from "./Empresa.js";
 
 export const Cita = sequelize.define("citas", {
   cita_codigo: {
@@ -49,6 +50,15 @@ export const Cita = sequelize.define("citas", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-Cita.sync({ alter: false });
+Cita.sync({ force: false });

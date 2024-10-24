@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
+import { Empresa } from "./Empresa.js";
 
 export const Funcionario = sequelize.define("funcionarios", {
   fun_codigo: {
@@ -63,6 +64,15 @@ export const Funcionario = sequelize.define("funcionarios", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-Funcionario.sync({ alter: false });
+Funcionario.sync({ force: false });

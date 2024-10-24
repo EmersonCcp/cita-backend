@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Compra } from "./Compra.js";
 import { Producto } from "./Producto.js";
+import { Empresa } from "./Empresa.js";
 
 //servira para guarda datos para categoria_gasto y categoria_material
 
@@ -38,6 +39,15 @@ export const DetalleCompra = sequelize.define(
     dc_precio_unitario: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    fk_empresa: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Empresa,
+        key: "emp_codigo",
+      },
+      onDelete: "RESTRICT",
     },
   },
   {

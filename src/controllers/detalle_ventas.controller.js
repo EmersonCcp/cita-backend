@@ -7,6 +7,16 @@ import { Producto } from "../models/Producto.js";
 export const saveOrUpdateDetallesVenta = async (req, res) => {
   try {
     const { ventaId, detalles } = req.body;
+    const { fk_empresa } = req.params;
+
+    // Verificar que fk_empresa sea proporcionado
+    if (!fk_empresa) {
+      return res.status(400).json({
+        ok: false,
+        message:
+          "Debe proporcionar una empresa (fk_empresa) para procesar la venta",
+      });
+    }
 
     // Verificar el stock disponible antes de procesar la venta
     for (const detalle of detalles) {
@@ -23,9 +33,8 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
 
       // Validar si hay suficiente stock
       if (producto.prod_cantidad < dv_cantidad) {
-        console.log("hola");
-
-        const deleted = await Venta.destroy({ where: { ven_codigo: ventaId } });
+        // Si no hay suficiente stock, elimina la venta asociada
+        await Venta.destroy({ where: { ven_codigo: ventaId, fk_empresa } });
 
         return res.status(200).json({
           ok: false,
@@ -33,11 +42,13 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
         });
       }
 
-      const detalleVenta = await DetalleVenta.create({
+      // Crear o actualizar el detalle de venta
+      await DetalleVenta.create({
         fk_venta: ventaId,
         fk_producto,
         dv_cantidad,
         dv_precio_unitario,
+        fk_empresa, // Relacionar el detalle de venta con la empresa
       });
     }
 
@@ -55,13 +66,14 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
 };
 
 export const getDetallesByVentaId = async (req, res) => {
-  const { ventaId } = req.params;
+  const { ventaId, fk_empresa } = req.params; // Asegúrate de obtener fk_empresa de los parámetros
 
   try {
-    // Buscar todos los detalles de venta asociados al ventaId
+    // Buscar todos los detalles de venta asociados al ventaId y fk_empresa
     const items = await DetalleVenta.findAll({
       where: {
         fk_venta: ventaId,
+        fk_empresa, // Agregar la condición para fk_empresa
       },
     });
 

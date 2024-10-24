@@ -13,7 +13,7 @@ const searchableFields = ["clientes.cli_nombre", "clientes.cli_apellido"];
 
 export const getAllWithSearch = async (req, res) => {
   try {
-    const { limit, pagination, query } = req.params;
+    const { limit, pagination, query, fk_empresa } = req.params;
 
     let queryAdd = ``;
     if (query && query !== ":query") {
@@ -26,25 +26,34 @@ export const getAllWithSearch = async (req, res) => {
       queryAdd = `WHERE (${conditions})`;
     }
 
+    // Agrega la condición para fk_empresa
+    let empresaCondition = ``;
+    if (fk_empresa) {
+      empresaCondition = queryAdd
+        ? `AND citas.fk_empresa = :fk_empresa`
+        : `WHERE citas.fk_empresa = :fk_empresa`;
+    }
+
     const sql = `
-        SELECT 
-          citas.cita_codigo AS cita_codigo,
-          clientes.cli_codigo AS fk_cliente,
-          CONCAT(clientes.cli_nombre, ' ', clientes.cli_apellido) AS cliente,
-          citas.cita_fecha AS fecha,
-          citas.cita_hora AS hora,
-          citas.cita_estado AS estado,
-          citas.cita_monto AS monto
-        FROM  citas
-        INNER JOIN clientes ON citas.fk_cliente = clientes.cli_codigo
-        ${queryAdd}
-        ORDER BY  citas.cita_fecha ASC
-        LIMIT ${limit}
-        OFFSET ${pagination}
-      `;
+      SELECT 
+        citas.cita_codigo AS cita_codigo,
+        clientes.cli_codigo AS fk_cliente,
+        CONCAT(clientes.cli_nombre, ' ', clientes.cli_apellido) AS cliente,
+        citas.cita_fecha AS fecha,
+        citas.cita_hora AS hora,
+        citas.cita_estado AS estado,
+        citas.cita_monto AS monto
+      FROM  citas
+      INNER JOIN clientes ON citas.fk_cliente = clientes.cli_codigo
+      ${queryAdd} ${empresaCondition}
+      ORDER BY  citas.cita_fecha ASC
+      LIMIT ${limit}
+      OFFSET ${pagination}
+    `;
 
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
+      replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
 
     res.status(200).json({ ok: true, items });

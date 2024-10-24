@@ -10,15 +10,15 @@ import {
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/clientes", authenticateToken, getClientes);
+router.get("/clientes/:fk_empresa", authenticateToken, getClientes);
 router.get(
-  "/clientes/:limit/:pagination/:query",
+  "/clientes/:fk_empresa/:limit/:pagination/:query",
   authenticateToken,
   getClientesWithSearch
 );
-router.get("/clientes/:id", authenticateToken, getCliente);
-router.post("/clientes", authenticateToken, createCliente);
-router.put("/clientes/:id", authenticateToken, updateCliente);
-router.delete("/clientes/:id", authenticateToken, deleteCliente);
+router.get("/clientes/:fk_empresa/:id", authenticateToken, getCliente);
+router.post("/clientes/:fk_empresa", authenticateToken, createCliente);
+router.put("/clientes/:fk_empresa/:id", authenticateToken, updateCliente);
+router.delete("/clientes/:fk_empresa/:id", authenticateToken, deleteCliente);
 
 export default router;

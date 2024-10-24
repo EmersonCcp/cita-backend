@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Proveedor } from "../models/Proveedor.js";
+import { Empresa } from "./Empresa.js";
 
 //servira para guarda datos para categoria_gasto y categoria_material
 
@@ -33,10 +34,20 @@ export const Compra = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    fk_empresa: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Empresa,
+        key: "emp_codigo",
+      },
+      onDelete: "RESTRICT",
+    },
   },
+
   {
     timestamps: false,
   }
 );
 
-Compra.sync({ alter: false });
+Compra.sync({ force: false });

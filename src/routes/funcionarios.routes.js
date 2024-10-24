@@ -10,15 +10,23 @@ import {
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/funcionarios", authenticateToken, getFuncionarios);
+router.get("/funcionarios/:fk_empresa", authenticateToken, getFuncionarios);
 router.get(
-  "/funcionarios/:limit/:pagination/:query",
+  "/funcionarios/:fk_empresa/:limit/:pagination/:query",
   authenticateToken,
   getFuncionariosWithSearch
 );
-router.get("/funcionarios/:id", authenticateToken, getFuncionario);
-router.post("/funcionarios", authenticateToken, createFuncionario);
-router.put("/funcionarios/:id", authenticateToken, updateFuncionario);
-router.delete("/funcionarios/:id", authenticateToken, deleteFuncionario);
+router.get("/funcionarios/:fk_empresa/:id", authenticateToken, getFuncionario);
+router.post("/funcionarios/:fk_empresa", authenticateToken, createFuncionario);
+router.put(
+  "/funcionarios/:fk_empresa/:id",
+  authenticateToken,
+  updateFuncionario
+);
+router.delete(
+  "/funcionarios/:fk_empresa/:id",
+  authenticateToken,
+  deleteFuncionario
+);
 
 export default router;

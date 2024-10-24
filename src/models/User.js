@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
+import { Empresa } from "./Empresa.js";
 
 const rolesEnum = [
   "ADMIN",
@@ -18,6 +19,8 @@ const rolesEnum = [
   "VALES",
   "PAGOS",
   "HORAS_EXTRA",
+  "PLANES",
+  "EMPRESAS",
 ];
 
 export const User = sequelize.define("users", {
@@ -55,6 +58,16 @@ export const User = sequelize.define("users", {
     allowNull: true,
     defaultValue: ["DASHBOARD"],
   },
+
+  fk_empresa: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Empresa,
+      key: "emp_codigo",
+    },
+    onDelete: "RESTRICT",
+  },
 });
 
-User.sync({ alter: false });
+User.sync({ force: false });

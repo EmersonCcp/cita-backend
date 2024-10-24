@@ -10,13 +10,17 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.get(
-  "/horas_extras/:limit/:pagination/:query",
+  "/horas_extras/:fk_empresa/:limit/:pagination/:query",
   authenticateToken,
   getAllWithSearch
 );
-router.get("/horas_extras/:id", authenticateToken, getHoraExtra);
-router.post("/horas_extras", authenticateToken, createHoraExtra);
-router.put("/horas_extras/:id", authenticateToken, updateHoraExtra);
-router.delete("/horas_extras/:id", authenticateToken, deleteHoraExtra);
+router.get("/horas_extras/:fk_empresa/:id", authenticateToken, getHoraExtra);
+router.post("/horas_extras/:fk_empresa", authenticateToken, createHoraExtra);
+router.put("/horas_extras/:fk_empresa/:id", authenticateToken, updateHoraExtra);
+router.delete(
+  "/horas_extras/:fk_empresa/:id",
+  authenticateToken,
+  deleteHoraExtra
+);
 
 export default router;
