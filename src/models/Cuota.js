@@ -13,14 +13,15 @@ export const Cuota = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    fk_venta: {
+    fk_operacion: {
+      // ID de la operación (venta o compra)
       type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Venta,
-        key: "ven_codigo",
-      },
-      onDelete: "CASCADE",
+      allowNull: false,
+    },
+    cuo_tipo_operacion: {
+      // Tipo de operación: "venta" o "compra"
+      type: DataTypes.ENUM("venta", "compra"),
+      allowNull: false,
     },
     cuo_numero: {
       //numero de cuota: 1,2,3
@@ -60,4 +61,4 @@ export const Cuota = sequelize.define(
   }
 );
 
-Cuota.sync({ force: false });
+Cuota.sync({ alter: false });

@@ -21,6 +21,7 @@ import valesRoutes from "./routes/vales.routes.js";
 import horaExtraRoutes from "./routes/hora_extra.routes.js";
 import planesRoutes from "./routes/planes.routes.js";
 import empresasRoutes from "./routes/empresas.routes.js";
+import deudasRoutes from "./routes/deudas.routes.js";
 
 //library
 import express from "express";
@@ -96,6 +97,7 @@ app.use("/v1/api", cuotasRoutes);
 app.use("/v1/api", comprasRoutes);
 app.use("/v1/api", cobrosRoutes);
 app.use("/v1/api", clienteRoutes);
+app.use("/v1/api", deudasRoutes);
 
 export default app;
 export { io };

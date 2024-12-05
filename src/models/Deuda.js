@@ -1,42 +1,42 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
-import { Venta } from "./Venta.js";
-import { Empresa } from "./Empresa.js";
+import { Compra } from "./Compra.js"; // Asegúrate de que tienes el modelo de Compra
+import { Empresa } from "./Empresa.js"; // Si es necesario asociar una empresa
 
-export const Cobro = sequelize.define("cobros", {
-  cob_codigo: {
+export const Deuda = sequelize.define("deudas", {
+  deuda_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  cob_fecha: {
+  deuda_fecha: {
     type: DataTypes.STRING,
     allowNull: false,
   },
 
-  cob_monto_total: {
+  deuda_monto_total: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
 
-  cob_estado: {
+  deuda_estado: {
     type: DataTypes.ENUM("pendiente", "pagado", "cancelado"),
     allowNull: false,
     defaultValue: "pendiente",
   },
 
-  cob_num_cuotas: {
+  deuda_num_cuotas: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
 
-  fk_venta: {
+  fk_compra: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Venta,
-      key: "ven_codigo",
+      model: Compra,
+      key: "com_codigo", // Cambia por el nombre correcto de la clave primaria de tu tabla de compras
     },
     onDelete: "CASCADE",
   },
@@ -46,10 +46,10 @@ export const Cobro = sequelize.define("cobros", {
     allowNull: false,
     references: {
       model: Empresa,
-      key: "emp_codigo",
+      key: "emp_codigo", // Si es necesario asociar a una empresa
     },
     onDelete: "RESTRICT",
   },
 });
 
-Cobro.sync({ alter: false });
+Deuda.sync({ force: false });

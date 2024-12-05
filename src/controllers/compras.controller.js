@@ -42,6 +42,7 @@ export const getCompras = async (req, res) => {
           c.com_codigo,
           c.com_precio_total,
           c.com_fecha_compra,
+          c.com_estado_entrega,
           c.com_factura,
           p.prov_nombre AS proveedor
       FROM 
@@ -49,7 +50,7 @@ export const getCompras = async (req, res) => {
       JOIN 
           proveedores p ON c.fk_proveedor = p.prov_codigo
       ${queryAdd} ${empresaCondition}
-      ORDER BY c.com_codigo ASC
+      ORDER BY c.com_fecha_compra DESC
       LIMIT ${limit}
       OFFSET ${pagination}
     `;

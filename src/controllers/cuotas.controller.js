@@ -5,18 +5,17 @@ import { getOne, create, update, remove } from "../utils/crudController.js";
 
 export const getCuotas = async (req, res) => {
   try {
-    const { ventaId, fk_empresa } = req.params; // Asegúrate de obtener fk_empresa
+    const { fk_operacion, tipo_operacion, fk_empresa } = req.params; // Asegúrate de obtener fk_empresa
 
     let sql = `
       SELECT * 
       FROM cuotas c 
-      JOIN ventas v ON c.fk_venta = v.ven_codigo
-      WHERE c.fk_venta = :ventaId AND v.fk_empresa = :fk_empresa
+      WHERE c.fk_operacion = :fk_operacion AND c.cuo_tipo_operacion = :tipo_operacion AND c.fk_empresa = :fk_empresa
     `;
 
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
-      replacements: { ventaId, fk_empresa }, // Pasar los valores de ventaId y fk_empresa
+      replacements: { fk_operacion, tipo_operacion, fk_empresa }, // Pasar los valores de ventaId y fk_empresa
     });
 
     res.status(200).json({ ok: true, items });

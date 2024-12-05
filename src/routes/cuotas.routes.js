@@ -9,7 +9,11 @@ import {
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/cuotas/:fk_empresa/:ventaId", authenticateToken, getCuotas);
+router.get(
+  "/cuotas/:fk_empresa/:fk_operacion/:tipo_operacion",
+  authenticateToken,
+  getCuotas
+);
 router.get("/cuotas/:fk_empresa/:id", authenticateToken, getCuota);
 router.post("/cuotas/:fk_empresa", authenticateToken, createCuota);
 router.put("/cuotas/:fk_empresa/:id", authenticateToken, updateCuota);

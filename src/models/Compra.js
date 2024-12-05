@@ -43,6 +43,31 @@ export const Compra = sequelize.define(
       },
       onDelete: "RESTRICT",
     },
+    // Campo para el estado de entrega con "cancelado"
+    com_estado_entrega: {
+      type: DataTypes.ENUM("pendiente", "proceso", "entregado", "cancelado"),
+      allowNull: false,
+      defaultValue: "pendiente",
+    },
+    // Campo para la fecha de entrega
+    com_fecha_entrega: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    com_num_cuotas: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    com_fecha_vencimiento: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    com_tipo_pago: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
 
   {
@@ -50,4 +75,4 @@ export const Compra = sequelize.define(
   }
 );
 
-Compra.sync({ force: false });
+Compra.sync({ alter: true });
