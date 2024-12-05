@@ -21,6 +21,7 @@ const rolesEnum = [
   "HORAS_EXTRA",
   "PLANES",
   "EMPRESAS",
+  "DEUDAS",
 ];
 
 export const User = sequelize.define("users", {
@@ -70,4 +71,4 @@ export const User = sequelize.define("users", {
   },
 });
 
-User.sync({ force: false });
+User.sync({ force: true });
