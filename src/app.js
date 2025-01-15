@@ -22,6 +22,8 @@ import horaExtraRoutes from "./routes/hora_extra.routes.js";
 import planesRoutes from "./routes/planes.routes.js";
 import empresasRoutes from "./routes/empresas.routes.js";
 import deudasRoutes from "./routes/deudas.routes.js";
+import pdfGeneratorRoutes from "./routes/pdf-generator.routes.js";
+import utilsRoutes from "./routes/utils.routes.js";
 
 //library
 import express from "express";
@@ -98,6 +100,8 @@ app.use("/v1/api", comprasRoutes);
 app.use("/v1/api", cobrosRoutes);
 app.use("/v1/api", clienteRoutes);
 app.use("/v1/api", deudasRoutes);
+app.use("/v1/api", pdfGeneratorRoutes);
+app.use("/v1/api", utilsRoutes);
 
 export default app;
 export { io };

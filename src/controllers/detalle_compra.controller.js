@@ -1,8 +1,8 @@
 import { sequelize } from "../database/database.js";
 import { DetalleCompra } from "../models/DetalleCompra.js";
 import { Compra } from "../models/Compra.js";
-import { remove } from "../utils/crudController.js";
 import { Producto } from "../models/Producto.js";
+import { remove } from "../utils/crudController.js";
 
 export const saveOrUpdateDetallesCompra = async (req, res) => {
   const transaction = await sequelize.transaction(); // Iniciar una transacción
@@ -56,6 +56,11 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
       }
     }
 
+    // const result = await actualizarEstadoEntrega(
+    //   compraId,
+    //   compra.com_estado_entrega
+    // );
+
     await transaction.commit(); // Confirmar la transacción si todo salió bien
     return res.status(200).json({
       ok: true,
@@ -70,6 +75,77 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
     });
   }
 };
+
+async function actualizarEstadoEntrega(compraId, nuevoEstado) {
+  try {
+    // Obtener la compra actual y su estado
+    const compra = await Compra.findByPk(compraId);
+    if (!compra) throw new Error("Compra no encontrada");
+
+    // Validar cambios de estado
+    const estadoAnterior = compra.com_estado_entrega;
+    if (estadoAnterior === nuevoEstado) {
+      throw new Error("El estado ya es el mismo");
+    }
+
+    // Obtener detalles de la compra
+    const detallesCompra = await DetalleCompra.findAll({
+      where: { fk_compra: compraId },
+    });
+
+    console.log("HOLIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+
+    // Realizar acciones según el nuevo estado
+    switch (nuevoEstado) {
+      case "pendiente":
+        // No afecta el stock
+        break;
+
+      case "proceso":
+        // Si se requiere, puedes marcar productos como reservados
+        break;
+
+      case "entregado":
+        if (estadoAnterior !== "entregado") {
+          // Actualizar el stock de cada producto
+          for (const detalle of detallesCompra) {
+            const producto = await Producto.findByPk(detalle.fk_producto);
+            if (!producto) continue;
+
+            // Aumentar el stock
+            producto.prod_cantidad += detalle.dc_cantidad;
+            await producto.save();
+          }
+        }
+        break;
+
+      case "cancelado":
+        if (estadoAnterior === "entregado") {
+          // Revertir el stock
+          for (const detalle of detallesCompra) {
+            const producto = await Producto.findByPk(detalle.fk_producto);
+            if (!producto) continue;
+
+            // Reducir el stock
+            producto.prod_cantidad -= detalle.dc_cantidad;
+            await producto.save();
+          }
+        }
+        break;
+
+      default:
+        throw new Error("Estado no válido");
+    }
+
+    // Actualizar el estado de la compra
+    compra.com_estado_entrega = nuevoEstado;
+    await compra.save();
+
+    return { ok: true, message: "Estado de entrega actualizado correctamente" };
+  } catch (error) {
+    return { ok: false, message: error.message };
+  }
+}
 
 export const getDetallesByCompraId = async (req, res) => {
   const { compraId } = req.params;

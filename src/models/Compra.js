@@ -75,4 +75,4 @@ export const Compra = sequelize.define(
   }
 );
 
-Compra.sync({ alter: true });
+Compra.sync({ alter: false });
