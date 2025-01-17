@@ -17,7 +17,8 @@ const searchableFields = [
 export const getProductos = getAllWithSearch(
   "productos",
   searchableFields,
-  "p.prod_nombre"
+  "p.prod_nombre",
+  Producto
 );
 export const getProducto = getOne(Producto, "prod_codigo");
 export const createProducto = create(Producto);

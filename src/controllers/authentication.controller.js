@@ -1,4 +1,5 @@
 import { User } from "../models/User.js";
+import { Empresa } from "../models/Empresa.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
@@ -24,9 +25,13 @@ export const login = async (req, res) => {
     });
 
     if (user) {
-      console.log(user.roles);
-
       const passwordValid = await bcrypt.compare(password, user.password);
+
+      const empresa = await Empresa.findOne({
+        where: { emp_codigo: user.fk_empresa },
+      });
+
+      const clienteEmpresa = empresa.get();
 
       if (passwordValid) {
         const token = jwt.sign(
@@ -36,6 +41,7 @@ export const login = async (req, res) => {
             username: user.username,
             roles: user.roles,
             fk_empresa: user.fk_empresa,
+            empresa: clienteEmpresa.emp_nombre,
           },
           "holamibro"
         );

@@ -12,7 +12,8 @@ const searchableFields = ["p.prov_nombre", "p.prov_ruc", "p.prov_documento"];
 export const getProveedores = getAllWithSearch(
   "proveedores",
   searchableFields,
-  "p.prov_nombre"
+  "p.prov_nombre",
+  Proveedor
 );
 export const getProveedor = getOne(Proveedor, "prov_codigo");
 export const createProveedor = create(Proveedor);

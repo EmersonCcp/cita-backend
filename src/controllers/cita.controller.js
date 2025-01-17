@@ -8,12 +8,25 @@ import {
   remove,
 } from "../utils/crudController.js";
 import { QueryTypes } from "sequelize";
+import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
+import { client } from "../index.js";
 
 const searchableFields = ["clientes.cli_nombre", "clientes.cli_apellido"];
 
 export const getAllWithSearch = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    const tableName = "citas";
+
+    // Generar una clave única para Redis
+    const redisKey = `${Cita.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+
+    // Intentar obtener los datos desde Redis
+    const reply = await client.get(redisKey);
+    if (reply) {
+      return res.status(200).json({ ok: true, items: JSON.parse(reply) });
+    }
 
     let queryAdd = ``;
     if (query && query !== ":query") {
@@ -43,7 +56,7 @@ export const getAllWithSearch = async (req, res) => {
         citas.cita_hora AS hora,
         citas.cita_estado AS estado,
         citas.cita_monto AS monto
-      FROM  citas
+      FROM  ${tableName}
       INNER JOIN clientes ON citas.fk_cliente = clientes.cli_codigo
       ${queryAdd} ${empresaCondition}
       ORDER BY  citas.cita_fecha ASC
@@ -55,6 +68,10 @@ export const getAllWithSearch = async (req, res) => {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
+
+    if (items.length > 0) {
+      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {
@@ -77,6 +94,8 @@ export const updateEstado = async (req, res) => {
     if (updatedRows === 0) {
       return res.status(404).json({ message: "Cita no encontrada" });
     }
+
+    await deleteKeysByPattern(`${Cita.name}:list:fk_empresa=`);
 
     res.json({ ok: true });
   } catch (error) {

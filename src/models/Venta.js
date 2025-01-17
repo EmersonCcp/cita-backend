@@ -66,6 +66,12 @@ export const Venta = sequelize.define("ventas", {
     allowNull: true,
   },
 
+  ven_estado_entrega: {
+    type: DataTypes.ENUM("pendiente", "proceso", "entregado", "cancelado"),
+    allowNull: false,
+    defaultValue: "pendiente",
+  },
+
   ven_tipo_pago: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -92,4 +98,4 @@ export const Venta = sequelize.define("ventas", {
   },
 });
 
-Venta.sync({ force: false });
+Venta.sync({ alter: false });

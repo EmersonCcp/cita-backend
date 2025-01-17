@@ -2,10 +2,13 @@ import { QueryTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Deuda } from "../models/Deuda.js";
 import { getOne, create, update, remove } from "../utils/crudController.js";
+import { client } from "../index.js";
 
 export const getDeudasWithSearch = async (req, res) => {
   try {
-    const { limit, pagination, query, fk_empresa } = req.params; // Asegúrate de obtener fk_empresa
+    const { limit, pagination, query, fk_empresa } = req.params;
+
+    const redisKey = `${Deuda.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -57,6 +60,10 @@ export const getDeudasWithSearch = async (req, res) => {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Pasar el valor de fk_empresa a la consulta
     });
+
+    if (items.length > 0) {
+      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {

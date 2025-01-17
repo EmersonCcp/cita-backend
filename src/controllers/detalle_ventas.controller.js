@@ -5,6 +5,7 @@ import { remove } from "../utils/crudController.js";
 import { Producto } from "../models/Producto.js";
 
 export const saveOrUpdateDetallesVenta = async (req, res) => {
+  const t = await sequelize.transaction(); // Iniciar transacción
   try {
     const { ventaId, detalles } = req.body;
     const { fk_empresa } = req.params;
@@ -18,14 +19,34 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
       });
     }
 
+    // Agrupar productos repetidos por fk_producto y sumar las cantidades
+    const detallesAgrupados = detalles.reduce((acc, detalle) => {
+      const { fk_producto, dv_cantidad, dv_precio_unitario } = detalle;
+      if (!acc[fk_producto]) {
+        acc[fk_producto] = {
+          fk_producto,
+          dv_cantidad: 0,
+          dv_precio_unitario,
+        };
+      }
+      acc[fk_producto].dv_cantidad += dv_cantidad;
+      return acc;
+    }, {});
+
+    console.log(detallesAgrupados);
+
+    // Convertir el objeto agrupado en un array de detalles
+    const detallesUnificados = Object.values(detallesAgrupados);
+
     // Verificar el stock disponible antes de procesar la venta
-    for (const detalle of detalles) {
+    for (const detalle of detallesUnificados) {
       const { fk_producto, dv_cantidad, dv_precio_unitario } = detalle;
 
       // Obtener el producto correspondiente
-      const producto = await Producto.findByPk(fk_producto);
+      const producto = await Producto.findByPk(fk_producto, { transaction: t });
 
       if (!producto) {
+        await t.rollback(); // Revertir transacción en caso de error
         return res
           .status(200)
           .json({ message: `Producto no encontrado: ${fk_producto}` });
@@ -33,30 +54,33 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
 
       // Validar si hay suficiente stock
       if (producto.prod_cantidad < dv_cantidad) {
-        // Si no hay suficiente stock, elimina la venta asociada
-        await Venta.destroy({ where: { ven_codigo: ventaId, fk_empresa } });
-
+        await t.rollback(); // Revertir transacción en caso de error
         return res.status(200).json({
           ok: false,
           message: `Stock insuficiente para el producto: <b>${producto.prod_nombre}</b>.<br><b>Stock disponible:</b> ${producto.prod_cantidad}, <b>solicitado:</b> ${dv_cantidad}`,
         });
+      } else {
+        // Crear o actualizar el detalle de venta
+        await DetalleVenta.create(
+          {
+            fk_venta: ventaId,
+            fk_producto,
+            dv_cantidad,
+            dv_precio_unitario,
+            fk_empresa, // Relacionar el detalle de venta con la empresa
+          },
+          { transaction: t }
+        );
       }
-
-      // Crear o actualizar el detalle de venta
-      await DetalleVenta.create({
-        fk_venta: ventaId,
-        fk_producto,
-        dv_cantidad,
-        dv_precio_unitario,
-        fk_empresa, // Relacionar el detalle de venta con la empresa
-      });
     }
 
+    await t.commit(); // Confirmar transacción
     return res.status(200).json({
       ok: true,
       message: "Detalles de venta guardados o actualizados correctamente",
     });
   } catch (error) {
+    await t.rollback(); // Revertir transacción en caso de error
     console.error(error);
     return res.status(500).json({
       ok: false,

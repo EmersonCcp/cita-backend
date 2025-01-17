@@ -10,10 +10,13 @@ import {
   remove,
 } from "../utils/crudController.js";
 import { sequelize } from "../database/database.js";
+import { client } from "../index.js";
 
 export const getCompras = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    const redisKey = `${Compra.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -61,6 +64,10 @@ export const getCompras = async (req, res) => {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
+
+    if (items.length > 0) {
+      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {

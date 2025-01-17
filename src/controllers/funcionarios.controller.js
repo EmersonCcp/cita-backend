@@ -1,3 +1,4 @@
+import { Empresa } from "../models/Empresa.js";
 import { Funcionario } from "../models/Funcionario.js";
 import {
   getAllWithSearch,
@@ -11,7 +12,8 @@ import {
 export const getFuncionariosWithSearch = getAllWithSearch(
   "funcionarios",
   ["p.fun_nombre", "p.fun_apellido"],
-  "p.fun_nombre"
+  "p.fun_nombre",
+  Funcionario
 );
 
 export const getFuncionarios = getAll(Funcionario);

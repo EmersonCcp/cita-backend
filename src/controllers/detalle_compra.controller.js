@@ -24,6 +24,8 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
         detalle;
 
       // Verificar si el detalle ya existe (actualizar si es el caso)
+      console.log({ detalles });
+
       console.log({ dc_codigo });
 
       if (dc_codigo) {

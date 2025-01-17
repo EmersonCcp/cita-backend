@@ -11,7 +11,8 @@ import {
 export const getServiciosWithSearch = getAllWithSearch(
   "servicios",
   ["p.ser_nombre", "p.ser_precio"],
-  "p.ser_nombre"
+  "p.ser_nombre",
+  Servicio
 );
 
 export const getServicios = getAll(Servicio);

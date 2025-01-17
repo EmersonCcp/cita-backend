@@ -11,7 +11,8 @@ import {
 export const getClientesWithSearch = getAllWithSearch(
   "clientes",
   ["p.cli_nombre", "p.cli_apellido"],
-  "p.cli_nombre"
+  "p.cli_nombre",
+  Cliente
 );
 
 export const getClientes = getAll(Cliente);

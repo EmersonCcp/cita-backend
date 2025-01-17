@@ -2,6 +2,7 @@ import { QueryTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { HoraExtra } from "../models/HoraExtra.js";
 import { getOne, create, update, remove } from "../utils/crudController.js";
+import { client } from "../index.js";
 
 const searchableFields = [
   "h.he_monto",
@@ -12,7 +13,9 @@ const searchableFields = [
 
 export const getAllWithSearch = async (req, res) => {
   try {
-    const { limit, pagination, query, fk_empresa } = req.params; // Obtener fk_empresa de los parámetros
+    const { limit, pagination, query, fk_empresa } = req.params;
+
+    const redisKey = `${HoraExtra.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query && query !== ":query") {
@@ -67,6 +70,10 @@ export const getAllWithSearch = async (req, res) => {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Usar para pasar el valor de fk_empresa
     });
+
+    if (items.length > 0) {
+      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {

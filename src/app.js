@@ -30,6 +30,7 @@ import express from "express";
 import http from "http";
 import { Server as WebSocketServer } from "socket.io";
 import cors from "cors";
+import responseTime from "response-time";
 
 //cronjob
 // import "./cronjobs/citasNotification.js";
@@ -49,6 +50,7 @@ const io = new WebSocketServer(server, {
 });
 
 app.use(cors());
+app.use(responseTime());
 app.use(logger);
 app.get("/serve", (req, res) => {
   res.send("¡El servidor está funcionando correctamente!");

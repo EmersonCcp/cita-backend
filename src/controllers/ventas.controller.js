@@ -9,16 +9,13 @@ import {
   remove,
 } from "../utils/crudController.js";
 import { sequelize } from "../database/database.js";
-
-// export const getVentasWithSearch = getAllWithSearch(
-//   "Ventas",
-//   ["p.cli_nombre", "p.cli_apellido"],
-//   "p.cli_nombre"
-// );
+import { client } from "../index.js";
 
 export const getVentas = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    const redisKey = `${Venta.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -51,6 +48,7 @@ export const getVentas = async (req, res) => {
         v.ven_precio_total,
         v.ven_fecha,
         v.ven_factura,
+        v.ven_estado_entrega,
         CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cliente
       FROM 
         ventas v
@@ -66,6 +64,10 @@ export const getVentas = async (req, res) => {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Pasar el valor de fk_empresa como reemplazo
     });
+
+    if (items.length > 0) {
+      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {
