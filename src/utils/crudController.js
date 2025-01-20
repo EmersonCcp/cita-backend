@@ -132,9 +132,11 @@ export const create = (Model) => async (req, res) => {
 
     await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
 
-    // Guardar el nuevo registro en Redis
-    const redisKey = `${Model.name}:${item.id}`; // Clave basada en el modelo y el ID
-    await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+    if (Model.name !== "productos") {
+      // Guardar el nuevo registro en Redis
+      const redisKey = `${Model.name}:${item.id}`;
+      await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+    }
 
     res.json({ ok: true, item });
   } catch (error) {
@@ -162,9 +164,11 @@ export const update = (Model, idField) => async (req, res) => {
 
     await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
 
-    // Actualizar la caché en Redis
-    const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
-    await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+    if (Model.name !== "productos") {
+      // Actualizar la caché en Redis
+      const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
+      await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+    }
 
     res.json({ ok: true, item });
   } catch (error) {
@@ -187,9 +191,11 @@ export const remove = (Model, idField) => async (req, res) => {
 
     await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
 
-    // Eliminar la clave correspondiente en Redis
-    const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
-    await client.del(redisKey);
+    if (Model.name !== "productos") {
+      // Eliminar la clave correspondiente en Redis
+      const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
+      await client.del(redisKey);
+    }
 
     res.json({ ok: true, message: "Record deleted successfully" });
   } catch (error) {

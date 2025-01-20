@@ -19,59 +19,62 @@ export const saveOrUpdateDetallesVenta = async (req, res) => {
       });
     }
 
-    // Agrupar productos repetidos por fk_producto y sumar las cantidades
-    const detallesAgrupados = detalles.reduce((acc, detalle) => {
-      const { fk_producto, dv_cantidad, dv_precio_unitario } = detalle;
-      if (!acc[fk_producto]) {
-        acc[fk_producto] = {
-          fk_producto,
-          dv_cantidad: 0,
-          dv_precio_unitario,
-        };
-      }
-      acc[fk_producto].dv_cantidad += dv_cantidad;
+    // Agrupar productos repetidos solo para validación de stock
+    const stockValidacion = detalles.reduce((acc, detalle) => {
+      const { fk_producto, dv_cantidad } = detalle;
+      acc[fk_producto] = (acc[fk_producto] || 0) + dv_cantidad;
       return acc;
     }, {});
 
-    console.log(detallesAgrupados);
-
-    // Convertir el objeto agrupado en un array de detalles
-    const detallesUnificados = Object.values(detallesAgrupados);
-
-    // Verificar el stock disponible antes de procesar la venta
-    for (const detalle of detallesUnificados) {
-      const { fk_producto, dv_cantidad, dv_precio_unitario } = detalle;
-
-      // Obtener el producto correspondiente
+    // Validar stock global por producto
+    for (const [fk_producto, totalCantidad] of Object.entries(
+      stockValidacion
+    )) {
       const producto = await Producto.findByPk(fk_producto, { transaction: t });
 
       if (!producto) {
         await t.rollback(); // Revertir transacción en caso de error
-        return res
-          .status(200)
-          .json({ message: `Producto no encontrado: ${fk_producto}` });
+        return res.status(404).json({
+          ok: false,
+          message: `Producto no encontrado: ${fk_producto}`,
+        });
       }
 
-      // Validar si hay suficiente stock
-      if (producto.prod_cantidad < dv_cantidad) {
+      if (producto.prod_cantidad < totalCantidad) {
         await t.rollback(); // Revertir transacción en caso de error
         return res.status(200).json({
           ok: false,
-          message: `Stock insuficiente para el producto: <b>${producto.prod_nombre}</b>.<br><b>Stock disponible:</b> ${producto.prod_cantidad}, <b>solicitado:</b> ${dv_cantidad}`,
+          message: `Stock insuficiente para el producto: <b>${producto.prod_nombre}</b>.<br><b>Stock disponible:</b> ${producto.prod_cantidad}, <b>solicitado:</b> ${totalCantidad}`,
         });
-      } else {
-        // Crear o actualizar el detalle de venta
-        await DetalleVenta.create(
-          {
-            fk_venta: ventaId,
-            fk_producto,
-            dv_cantidad,
-            dv_precio_unitario,
-            fk_empresa, // Relacionar el detalle de venta con la empresa
-          },
-          { transaction: t }
-        );
       }
+    }
+
+    // Crear detalles de venta
+    for (const detalle of detalles) {
+      const { fk_producto, dv_cantidad, dv_precio_unitario } = detalle;
+
+      // Obtener el producto para verificar nuevamente (por transacciones paralelas)
+      const producto = await Producto.findByPk(fk_producto, { transaction: t });
+
+      if (!producto) {
+        await t.rollback(); // Revertir transacción en caso de error
+        return res.status(404).json({
+          ok: false,
+          message: `Producto no encontrado: ${fk_producto}`,
+        });
+      }
+
+      // Crear el detalle de venta
+      await DetalleVenta.create(
+        {
+          fk_venta: ventaId,
+          fk_producto,
+          dv_cantidad,
+          dv_precio_unitario,
+          fk_empresa,
+        },
+        { transaction: t }
+      );
     }
 
     await t.commit(); // Confirmar transacción
