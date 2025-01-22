@@ -29,7 +29,7 @@ export const CitaServicio = sequelize.define("citas_servicios", {
     onDelete: "RESTRICT",
   },
   cs_monto: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
   fk_empresa: {
@@ -43,4 +43,4 @@ export const CitaServicio = sequelize.define("citas_servicios", {
   },
 });
 
-CitaServicio.sync({ force: false });
+CitaServicio.sync({ alter: false });

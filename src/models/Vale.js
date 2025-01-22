@@ -22,7 +22,7 @@ export const Vale = sequelize.define("vale", {
   },
 
   vale_monto: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
     defaultValue: 0,
   },
@@ -53,4 +53,4 @@ export const Vale = sequelize.define("vale", {
   },
 });
 
-Vale.sync({ force: false });
+Vale.sync({ alter: false });

@@ -37,7 +37,7 @@ export const DetalleCompra = sequelize.define(
       allowNull: false,
     },
     dc_precio_unitario: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     fk_empresa: {
@@ -55,4 +55,4 @@ export const DetalleCompra = sequelize.define(
   }
 );
 
-DetalleCompra.sync({ force: false });
+DetalleCompra.sync({ alter: false });

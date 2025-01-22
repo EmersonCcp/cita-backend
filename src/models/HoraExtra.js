@@ -27,18 +27,18 @@ export const HoraExtra = sequelize.define("horas_extra", {
   },
 
   he_horas: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
     defaultValue: 0,
   },
 
   he_pago_hora: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
 
   he_monto: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
 
@@ -63,4 +63,4 @@ export const HoraExtra = sequelize.define("horas_extra", {
   },
 });
 
-HoraExtra.sync({ force: false });
+HoraExtra.sync({ alter: false });

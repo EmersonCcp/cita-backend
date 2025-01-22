@@ -2,6 +2,8 @@ import { QueryTypes } from "sequelize";
 import { Compra } from "../models/Compra.js";
 import { Producto } from "../models/Producto.js";
 import { DetalleCompra } from "../models/DetalleCompra.js";
+import { errorHandler } from "../utils/errorHandler.js";
+import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 import {
   getAllWithSearch,
   getOne,
@@ -78,7 +80,127 @@ export const getCompras = async (req, res) => {
 export const getCompra = getOne(Compra, "com_codigo");
 export const createCompra = create(Compra);
 export const updateCompra = update(Compra, "com_codigo");
-export const deleteCompra = remove(Compra, "com_codigo");
+// export const deleteCompra = remove(Compra, "com_codigo");
+
+export const deleteCompra = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { id, fk_empresa } = req.params;
+
+    // Consultar en la base de datos
+    const item = await Compra.findOne({
+      where: { com_codigo: id, fk_empresa },
+      transaction,
+    });
+
+    if (!item) {
+      return res
+        .status(404)
+        .json({ ok: false, message: "Registro no encontrado" });
+    }
+
+    if (item.com_estado_entrega === "entregado") {
+      const sqlUpdateStock = `SELECT fk_producto, dc_cantidad FROM detalle_compras WHERE fk_compra = ${item.com_codigo};`;
+
+      const detalles = await sequelize.query(sqlUpdateStock, {
+        type: QueryTypes.SELECT,
+        transaction,
+      });
+
+      if (detalles.length > 0) {
+        // Agrupar productos por ID y sumar cantidades
+        const productosAgrupados = detalles.reduce(
+          (acc, { fk_producto, dc_cantidad }) => {
+            acc[fk_producto] = (acc[fk_producto] || 0) + dc_cantidad;
+            return acc;
+          },
+          {}
+        );
+
+        // Actualizar el stock según el cambio de estado
+        for (const [fk_producto, cantidad] of Object.entries(
+          productosAgrupados
+        )) {
+          const sqlUpdate = `UPDATE productos
+                             SET prod_cantidad = prod_cantidad - ${cantidad}
+                             WHERE prod_codigo = ${fk_producto}`;
+          await sequelize.query(sqlUpdate, {
+            type: QueryTypes.UPDATE,
+            transaction,
+          });
+        }
+      }
+    }
+
+    // Eliminar cuotas
+    const sqlDeleteCuotas = `DELETE FROM cuotas WHERE cuo_tipo_operacion = 'compra' AND fk_operacion = ${id}`;
+    await sequelize.query(sqlDeleteCuotas, {
+      type: QueryTypes.DELETE,
+      transaction,
+    });
+
+    // Devolver saldo a las cajas
+    const sqlDevolverStock = `WITH TotalMovimientos AS (
+      SELECT 
+        fk_caja, 
+        SUM(mc_monto) AS total_monto
+      FROM 
+        movimientos_cajas
+      WHERE 
+        fk_operacion = ${id} 
+      GROUP BY 
+        fk_caja
+    )
+    
+    UPDATE 
+      cajas
+    SET 
+      caja_saldo_actual = caja_saldo_actual + tm.total_monto
+    FROM 
+      TotalMovimientos tm
+    WHERE 
+      cajas.caja_codigo = tm.fk_caja;`;
+    await sequelize.query(sqlDevolverStock, { transaction });
+
+    // Eliminar movimientos de caja
+    const sqlMovimientoCaja = `DELETE FROM movimientos_cajas WHERE fk_operacion = ${id} AND mc_tipo_operacion = 'compra'`;
+    await sequelize.query(sqlMovimientoCaja, {
+      type: QueryTypes.DELETE,
+      transaction,
+    });
+
+    // Intentar eliminar el registro de la base de datos
+    const deleted = await Compra.destroy({
+      where: { com_codigo: id, fk_empresa },
+      transaction,
+    });
+
+    if (!deleted) {
+      await transaction.rollback();
+      return res
+        .status(404)
+        .json({ ok: false, message: "Registro no encontrado" });
+    }
+
+    // Limpiar las claves en Redis
+    await deleteKeysByPattern(
+      `${Compra.name}:list:fk_empresa=${fk_empresa}:`,
+      Compra.name,
+      fk_empresa
+    );
+
+    const redisKey = `${Compra.name}:${id}`;
+    await client.del(redisKey);
+
+    await transaction.commit();
+
+    res.json({ ok: true, message: "Registro eliminado exitosamente" });
+  } catch (error) {
+    await transaction.rollback();
+    errorHandler(res, error);
+  }
+};
 
 export const actualizarEstadoEntrega = async (compraId, nuevoEstado) => {
   try {

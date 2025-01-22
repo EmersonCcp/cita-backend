@@ -28,12 +28,8 @@ export const getAllWithSearch =
         await client.connect();
       }
 
-      console.log({ model: Model.name });
-
       // Generar una clave única para Redis
       const redisKey = `${Model.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
-
-      console.log({ redisKey });
 
       // Intentar obtener los datos desde Redis
       if (Model.name !== "productos") {
@@ -130,7 +126,19 @@ export const create = (Model) => async (req, res) => {
     // Crear el registro en la base de datos
     const item = await Model.create({ ...req.body, fk_empresa });
 
-    await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
+    // Verificar si el registro se creó correctamente
+    if (!item) {
+      return res
+        .status(200)
+        .json({ ok: false, message: "Error al crear el registro." });
+    }
+
+    // Borrar claves en Redis relacionadas con listas de la empresa
+    await deleteKeysByPattern(
+      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
+      Model.name,
+      fk_empresa
+    );
 
     if (Model.name !== "productos") {
       // Guardar el nuevo registro en Redis
@@ -154,7 +162,9 @@ export const update = (Model, idField) => async (req, res) => {
     });
 
     if (!updated) {
-      return res.status(404).json({ message: "Record not found" });
+      return res
+        .status(404)
+        .json({ ok: false, message: "Error al actualizar el registro." });
     }
 
     // Obtener el registro actualizado
@@ -162,7 +172,11 @@ export const update = (Model, idField) => async (req, res) => {
       where: { [idField]: id, fk_empresa },
     });
 
-    await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
+    await deleteKeysByPattern(
+      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
+      Model.name,
+      fk_empresa
+    );
 
     if (Model.name !== "productos") {
       // Actualizar la caché en Redis
@@ -186,10 +200,16 @@ export const remove = (Model, idField) => async (req, res) => {
     });
 
     if (!deleted) {
-      return res.status(404).json({ message: "Record not found" });
+      return res
+        .status(404)
+        .json({ ok: false, message: "Error al eliminar el registro" });
     }
 
-    await deleteKeysByPattern(`${Model.name}:list:fk_empresa=${fk_empresa}:`);
+    await deleteKeysByPattern(
+      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
+      Model.name,
+      fk_empresa
+    );
 
     if (Model.name !== "productos") {
       // Eliminar la clave correspondiente en Redis

@@ -22,7 +22,7 @@ export const Pago = sequelize.define("pagos", {
   },
 
   pago_monto: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
     defaultValue: 0,
   },
@@ -43,4 +43,4 @@ export const Pago = sequelize.define("pagos", {
   },
 });
 
-Pago.sync({ force: false });
+Pago.sync({ alter: false });

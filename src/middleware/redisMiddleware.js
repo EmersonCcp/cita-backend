@@ -1,6 +1,6 @@
 import { client } from "../index.js";
 
-export const deleteKeysByPattern = async (pattern) => {
+export const deleteKeysByPattern = async (pattern, model, fk_empresa) => {
   try {
     let cursor = "0";
     let keysToDelete = [];
@@ -15,7 +15,7 @@ export const deleteKeysByPattern = async (pattern) => {
         const keys = result.keys; // Las claves obtenidas
 
         const filteredKeys = keys.filter((key) =>
-          key.startsWith("clientes:fk_empresa=1")
+          key.startsWith(`${model}:list:fk_empresa=${fk_empresa}`)
         );
 
         // Agregamos las claves filtradas a la lista de claves a eliminar

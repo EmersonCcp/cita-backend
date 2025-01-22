@@ -16,7 +16,7 @@ export const Cobro = sequelize.define("cobros", {
   },
 
   cob_monto_total: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
 

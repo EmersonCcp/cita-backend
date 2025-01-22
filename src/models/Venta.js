@@ -17,7 +17,7 @@ export const Venta = sequelize.define("ventas", {
   },
 
   ven_precio_total: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
 

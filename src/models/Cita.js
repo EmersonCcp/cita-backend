@@ -30,7 +30,7 @@ export const Cita = sequelize.define("citas", {
     onDelete: "RESTRICT",
   },
   cita_monto: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
   cita_fecha: {
@@ -61,4 +61,4 @@ export const Cita = sequelize.define("citas", {
   },
 });
 
-Cita.sync({ force: false });
+Cita.sync({ alter: false });

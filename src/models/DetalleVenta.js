@@ -41,7 +41,7 @@ export const DetalleVenta = sequelize.define(
     },
 
     dv_precio_unitario: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     fk_empresa: {
@@ -59,4 +59,4 @@ export const DetalleVenta = sequelize.define(
   }
 );
 
-DetalleVenta.sync({ force: false });
+DetalleVenta.sync({ alter: false });

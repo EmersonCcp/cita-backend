@@ -24,9 +24,6 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
         detalle;
 
       // Verificar si el detalle ya existe (actualizar si es el caso)
-      console.log({ detalles });
-
-      console.log({ dc_codigo });
 
       if (dc_codigo) {
         const detalleExistente = await DetalleCompra.findByPk(dc_codigo, {
@@ -57,11 +54,6 @@ export const saveOrUpdateDetallesCompra = async (req, res) => {
         );
       }
     }
-
-    // const result = await actualizarEstadoEntrega(
-    //   compraId,
-    //   compra.com_estado_entrega
-    // );
 
     await transaction.commit(); // Confirmar la transacción si todo salió bien
     return res.status(200).json({

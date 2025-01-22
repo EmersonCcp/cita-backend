@@ -19,7 +19,7 @@ export const Plan = sequelize.define("planes", {
   },
 
   plan_precio: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
     defaultValue: 0,
   },

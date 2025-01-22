@@ -20,7 +20,7 @@ export const Servicio = sequelize.define("servicios", {
   },
 
   ser_precio: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
 
@@ -44,4 +44,4 @@ export const Servicio = sequelize.define("servicios", {
   },
 });
 
-Servicio.sync({ force: false });
+Servicio.sync({ alter: false });

@@ -16,7 +16,7 @@ export const Deuda = sequelize.define("deudas", {
   },
 
   deuda_monto_total: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
 
@@ -52,4 +52,4 @@ export const Deuda = sequelize.define("deudas", {
   },
 });
 
-Deuda.sync({ force: false });
+Deuda.sync({ alter: false });
