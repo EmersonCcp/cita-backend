@@ -19,36 +19,36 @@ export const getAll = (Model) => async (req, res) => {
 };
 
 export const getAllWithSearch =
-  (tableName, searchableFields, orderBy, Model) => async (req, res) => {
+  (tableName, searchableFields, orderBy, Model, hasFkEmpresa = true) =>
+  async (req, res) => {
     try {
       const { limit, pagination, query, fk_empresa } = req.params;
 
-      // Validar conexión a Redis
       if (!client.isOpen) {
         await client.connect();
       }
 
-      // Generar una clave única para Redis
-      const redisKey = `${Model.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+      const redisKey = `${Model.name}:list:${
+        hasFkEmpresa ? `fk_empresa=${fk_empresa}:` : ""
+      }query=${query}:limit=${limit}:pagination=${pagination}`;
 
-      // Intentar obtener los datos desde Redis
-      if (Model.name !== "productos") {
+      if (Model.name !== "productos" && Model.name !== "cajas") {
         const reply = await client.get(redisKey);
         if (reply) {
           return res.status(200).json({ ok: true, items: JSON.parse(reply) });
         }
       }
 
-      // Construir la consulta SQL
-      let queryAdd = `WHERE fk_empresa = ${fk_empresa} `; // Filtra por fk_empresa
+      let queryAdd = hasFkEmpresa ? `WHERE fk_empresa = ${fk_empresa} ` : "";
+
       if (query !== ":query") {
         const conditions = searchableFields
           .map((field) => `${field}::VARCHAR ILIKE '%${query}%'`)
           .join(" OR ");
-        queryAdd += `AND (${conditions})`;
+        queryAdd += `${hasFkEmpresa ? "AND" : "WHERE"} (${conditions})`;
       }
 
-      let sql = `
+      const sql = `
       SELECT * FROM ${tableName} p
       ${queryAdd}
       ORDER BY ${orderBy} ASC
@@ -56,16 +56,18 @@ export const getAllWithSearch =
       OFFSET ${pagination}
       `;
 
-      // Consultar la base de datos
       const items = await sequelize.query(sql, {
         type: QueryTypes.SELECT,
       });
 
-      if (items.length > 0 && Model.name !== "productos") {
+      if (
+        items.length > 0 &&
+        Model.name !== "productos" &&
+        Model.name !== "cajas"
+      ) {
         await client.set(redisKey, JSON.stringify(items), "EX", 3600);
       }
 
-      // Responder con los resultados
       res.status(200).json({ ok: true, items });
     } catch (error) {
       console.error("Error in getAllWithSearch:", error);
@@ -73,152 +75,151 @@ export const getAllWithSearch =
     }
   };
 
-export const getOne = (Model, idField) => async (req, res) => {
-  try {
-    const { id, fk_empresa } = req.params;
+export const getOne =
+  (Model, idField, hasFkEmpresa = true) =>
+  async (req, res) => {
+    try {
+      const { id, fk_empresa } = req.params;
 
-    // Validar conexión a Redis
-    if (!client.isOpen) {
-      await client.connect();
-    }
+      if (!client.isOpen) {
+        await client.connect();
+      }
 
-    // Prefijo para Redis
-    const redisKey = `${Model.name}:${id}`;
+      const redisKey = `${Model.name}:${id}`;
 
-    if (Model.name !== "productos") {
-      // Intentar obtener datos desde Redis
-      const reply = await client.get(redisKey);
-      if (reply) {
-        try {
-          const parsedReply = JSON.parse(reply);
-          return res.json({ ok: true, item: parsedReply });
-        } catch (parseError) {
-          console.error("Error parsing Redis reply:", parseError);
+      if (Model.name !== "productos" && Model.name !== "cajas") {
+        const reply = await client.get(redisKey);
+        if (reply) {
+          try {
+            return res.json({ ok: true, item: JSON.parse(reply) });
+          } catch (parseError) {
+            console.error("Error parsing Redis reply:", parseError);
+          }
         }
       }
+
+      const where = hasFkEmpresa
+        ? { [idField]: id, fk_empresa }
+        : { [idField]: id };
+
+      const item = await Model.findOne({ where });
+
+      if (!item) {
+        return res.status(404).json({ message: "Record not found" });
+      }
+
+      if (Model.name !== "productos" && Model.name !== "cajas") {
+        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      }
+
+      res.json({ ok: true, item });
+    } catch (error) {
+      console.error("Error in getOne:", error);
+      errorHandler(res, error);
     }
+  };
 
-    // Consultar en la base de datos
-    const item = await Model.findOne({
-      where: { [idField]: id, fk_empresa },
-    });
-    if (!item) {
-      return res.status(404).json({ message: "Record not found" });
+export const create =
+  (Model, hasFkEmpresa = true) =>
+  async (req, res) => {
+    try {
+      const { fk_empresa } = req.params;
+
+      const data = hasFkEmpresa ? { ...req.body, fk_empresa } : { ...req.body };
+
+      const item = await Model.create(data);
+
+      if (!item) {
+        return res
+          .status(200)
+          .json({ ok: false, message: "Error al crear el registro." });
+      }
+
+      if (hasFkEmpresa) {
+        await deleteKeysByPattern(
+          `${Model.name}:list:fk_empresa=${fk_empresa}:`
+        );
+      }
+
+      if (Model.name !== "productos" && Model.name !== "cajas") {
+        const redisKey = `${Model.name}:${item.id}`;
+        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      }
+
+      res.json({ ok: true, item });
+    } catch (error) {
+      errorHandler(res, error);
     }
+  };
 
-    if (Model.name !== "productos") {
-      // Guardar en Redis con un TTL de 1 hora
-      await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+export const update =
+  (Model, idField, hasFkEmpresa = true) =>
+  async (req, res) => {
+    try {
+      const { id, fk_empresa } = req.params;
+
+      const where = hasFkEmpresa
+        ? { [idField]: id, fk_empresa }
+        : { [idField]: id };
+
+      const [updated] = await Model.update(req.body, { where });
+
+      if (!updated) {
+        return res
+          .status(404)
+          .json({ ok: false, message: "Error al actualizar el registro." });
+      }
+
+      const item = await Model.findOne({ where });
+
+      if (hasFkEmpresa) {
+        await deleteKeysByPattern(
+          `${Model.name}:list:fk_empresa=${fk_empresa}:`
+        );
+      }
+
+      if (Model.name !== "productos" && Model.name !== "cajas") {
+        const redisKey = `${Model.name}:${id}`;
+        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      }
+
+      res.json({ ok: true, item });
+    } catch (error) {
+      errorHandler(res, error);
     }
+  };
 
-    // Responder con el resultado
-    res.json({ ok: true, item });
-  } catch (error) {
-    console.error("Error in getOne:", error);
-    errorHandler(res, error);
-  }
-};
+export const remove =
+  (Model, idField, hasFkEmpresa = true) =>
+  async (req, res) => {
+    try {
+      const { id, fk_empresa } = req.params;
 
-export const create = (Model) => async (req, res) => {
-  try {
-    const { fk_empresa } = req.params; // O extraer desde req.body si es parte de los datos
+      const where = hasFkEmpresa
+        ? { [idField]: id, fk_empresa }
+        : { [idField]: id };
 
-    // Crear el registro en la base de datos
-    const item = await Model.create({ ...req.body, fk_empresa });
+      const deleted = await Model.destroy({ where });
 
-    // Verificar si el registro se creó correctamente
-    if (!item) {
-      return res
-        .status(200)
-        .json({ ok: false, message: "Error al crear el registro." });
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ ok: false, message: "Error al eliminar el registro" });
+      }
+
+      if (hasFkEmpresa) {
+        await deleteKeysByPattern(
+          `${Model.name}:list:fk_empresa=${fk_empresa}:`
+        );
+      }
+
+      if (Model.name !== "productos" && Model.name !== "cajas") {
+        const redisKey = `${Model.name}:${id}`;
+        await client.del(redisKey);
+      }
+
+      res.json({ ok: true, message: "Record deleted successfully" });
+    } catch (error) {
+      errorHandler(res, error);
     }
-
-    // Borrar claves en Redis relacionadas con listas de la empresa
-    await deleteKeysByPattern(
-      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
-      Model.name,
-      fk_empresa
-    );
-
-    if (Model.name !== "productos") {
-      // Guardar el nuevo registro en Redis
-      const redisKey = `${Model.name}:${item.id}`;
-      await client.set(redisKey, JSON.stringify(item), "EX", 3600);
-    }
-
-    res.json({ ok: true, item });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-};
-
-export const update = (Model, idField) => async (req, res) => {
-  try {
-    const { id, fk_empresa } = req.params;
-
-    // Actualizar el registro en la base de datos
-    const [updated] = await Model.update(req.body, {
-      where: { [idField]: id, fk_empresa }, // Filtro por empresa y ID
-    });
-
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ ok: false, message: "Error al actualizar el registro." });
-    }
-
-    // Obtener el registro actualizado
-    const item = await Model.findOne({
-      where: { [idField]: id, fk_empresa },
-    });
-
-    await deleteKeysByPattern(
-      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
-      Model.name,
-      fk_empresa
-    );
-
-    if (Model.name !== "productos") {
-      // Actualizar la caché en Redis
-      const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
-      await client.set(redisKey, JSON.stringify(item), "EX", 3600);
-    }
-
-    res.json({ ok: true, item });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-};
-
-export const remove = (Model, idField) => async (req, res) => {
-  try {
-    const { id, fk_empresa } = req.params;
-
-    // Intentar eliminar el registro de la base de datos
-    const deleted = await Model.destroy({
-      where: { [idField]: id, fk_empresa }, // Filtro por empresa y ID
-    });
-
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ ok: false, message: "Error al eliminar el registro" });
-    }
-
-    await deleteKeysByPattern(
-      `${Model.name}:list:fk_empresa=${fk_empresa}:`,
-      Model.name,
-      fk_empresa
-    );
-
-    if (Model.name !== "productos") {
-      // Eliminar la clave correspondiente en Redis
-      const redisKey = `${Model.name}:${id}`; // Clave basada en el modelo y el ID
-      await client.del(redisKey);
-    }
-
-    res.json({ ok: true, message: "Record deleted successfully" });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-};
+  };

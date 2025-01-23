@@ -16,9 +16,11 @@ const searchableFields = [
 export const getPlanes = getAllWithSearch(
   "planes",
   searchableFields,
-  "p.plan_nombre"
+  "p.plan_nombre",
+  Plan,
+  false
 );
-export const getPlan = getOne(Plan, "plan_codigo");
+export const getPlan = getOne(Plan, "plan_codigo", false);
 export const createPlan = create(Plan);
-export const updatePlan = update(Plan, "plan_codigo");
-export const deletePlan = remove(Plan, "plan_codigo");
+export const updatePlan = update(Plan, "plan_codigo", false);
+export const deletePlan = remove(Plan, "plan_codigo", false);
