@@ -3,7 +3,7 @@ import { sequelize } from "../database/database.js";
 import { Caja } from "./Caja.js";
 import { Empresa } from "./Empresa.js";
 
-export const MovimientoCaja = sequelize.define("movimientos_caja", {
+export const MovimientoCaja = sequelize.define("movimientos_cajas", {
   mc_codigo: {
     type: DataTypes.INTEGER,
     autoIncrement: true,

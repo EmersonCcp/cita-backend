@@ -32,7 +32,11 @@ export const getAllWithSearch =
         hasFkEmpresa ? `fk_empresa=${fk_empresa}:` : ""
       }query=${query}:limit=${limit}:pagination=${pagination}`;
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         const reply = await client.get(redisKey);
         if (reply) {
           return res.status(200).json({ ok: true, items: JSON.parse(reply) });
@@ -63,7 +67,8 @@ export const getAllWithSearch =
       if (
         items.length > 0 &&
         Model.name !== "productos" &&
-        Model.name !== "cajas"
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
       ) {
         await client.set(redisKey, JSON.stringify(items), "EX", 3600);
       }
@@ -87,7 +92,11 @@ export const getOne =
 
       const redisKey = `${Model.name}:${id}`;
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         const reply = await client.get(redisKey);
         if (reply) {
           try {
@@ -108,7 +117,11 @@ export const getOne =
         return res.status(404).json({ message: "Record not found" });
       }
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
       }
 
@@ -141,7 +154,11 @@ export const create =
         );
       }
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         const redisKey = `${Model.name}:${item.id}`;
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
       }
@@ -178,7 +195,11 @@ export const update =
         );
       }
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         const redisKey = `${Model.name}:${id}`;
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
       }
@@ -213,7 +234,11 @@ export const remove =
         );
       }
 
-      if (Model.name !== "productos" && Model.name !== "cajas") {
+      if (
+        Model.name !== "productos" &&
+        Model.name !== "cajas" &&
+        Model.name !== "movimientos_cajas"
+      ) {
         const redisKey = `${Model.name}:${id}`;
         await client.del(redisKey);
       }
