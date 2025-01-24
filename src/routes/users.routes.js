@@ -12,17 +12,17 @@ const router = Router();
 
 router.get(
   "/users/:fk_empresa/:limit/:pagination/:query",
-  authenticateToken,
+
   getUsers
 );
-router.get("/users/:fk_empresa/:id", authenticateToken, getUser);
+router.get("/users/:fk_empresa/:id", getUser);
 router.put(
   "/users/:fk_empresa/email_update/:id",
-  authenticateToken,
+
   updateEmail
 );
-router.post("/users/:fk_empresa", authenticateToken, createUser);
-router.put("/users/:fk_empresa/:id", authenticateToken, updateUser);
-router.delete("/users/:fk_empresa/:id", authenticateToken, deleteUser);
+router.post("/users/:fk_empresa", createUser);
+router.put("/users/:fk_empresa/:id", updateUser);
+router.delete("/users/:fk_empresa/:id", deleteUser);
 
 export default router;

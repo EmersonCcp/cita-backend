@@ -59,6 +59,7 @@ app.get("/serve", (req, res) => {
 });
 
 let socketID;
+
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
   socketID = socket.id;
@@ -67,6 +68,10 @@ io.on("connection", (socket) => {
     console.log("A user disconnected:", socket.id);
   });
 });
+
+export const stateEmpresa = (message) => {
+  io.emit("stateEmpresa", message);
+};
 
 // Ejemplo de enviar notificación
 export const sendNotification = (message) => {

@@ -3,6 +3,7 @@ import { sequelize } from "../database/database.js";
 import { HoraExtra } from "../models/HoraExtra.js";
 import { getOne, create, update, remove } from "../utils/crudController.js";
 import { client } from "../index.js";
+import { Empresa } from "../models/Empresa.js";
 
 const searchableFields = [
   "h.he_monto",
@@ -14,6 +15,20 @@ const searchableFields = [
 export const getAllWithSearch = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    if (fk_empresa) {
+      const empresa = await Empresa.findOne({
+        where: { emp_codigo: fk_empresa },
+      });
+
+      const clienteEmpresa = empresa.get();
+
+      if (clienteEmpresa.emp_estado === false) {
+        return res
+          .status(200)
+          .json({ ok: false, message: "Cuenta Desabilitada" });
+      }
+    }
 
     const redisKey = `${HoraExtra.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 

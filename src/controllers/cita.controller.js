@@ -10,12 +10,27 @@ import {
 import { QueryTypes } from "sequelize";
 import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 import { client } from "../index.js";
+import { Empresa } from "../models/Empresa.js";
 
 const searchableFields = ["clientes.cli_nombre", "clientes.cli_apellido"];
 
 export const getAllWithSearch = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    if (fk_empresa) {
+      const empresa = await Empresa.findOne({
+        where: { emp_codigo: fk_empresa },
+      });
+
+      const clienteEmpresa = empresa.get();
+
+      if (clienteEmpresa.emp_estado === false) {
+        return res
+          .status(200)
+          .json({ ok: false, message: "Cuenta Desabilitada" });
+      }
+    }
 
     const tableName = "citas";
 

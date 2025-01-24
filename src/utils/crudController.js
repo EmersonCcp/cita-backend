@@ -1,12 +1,23 @@
 import { errorHandler } from "./errorHandler.js";
 import { QueryTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
+import { Empresa } from "../models/Empresa.js";
 import { client } from "../index.js";
 import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 
 export const getAll = (Model) => async (req, res) => {
   try {
     const { fk_empresa } = req.params;
+
+    const empresa = await Empresa.findOne({
+      where: { emp_codigo: fk_empresa },
+    });
+
+    const clienteEmpresa = empresa.get();
+
+    if (clienteEmpresa.emp_estado === false) {
+      res.status(500).json({ ok: false, error: "Cuenta Desabilitada" });
+    }
 
     const items = await Model.findAll({
       where: { fk_empresa },
@@ -24,6 +35,20 @@ export const getAllWithSearch =
     try {
       const { limit, pagination, query, fk_empresa } = req.params;
 
+      if (hasFkEmpresa) {
+        const empresa = await Empresa.findOne({
+          where: { emp_codigo: fk_empresa },
+        });
+
+        const clienteEmpresa = empresa.get();
+
+        if (clienteEmpresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      }
+
       if (!client.isOpen) {
         await client.connect();
       }
@@ -35,7 +60,8 @@ export const getAllWithSearch =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         const reply = await client.get(redisKey);
         if (reply) {
@@ -68,7 +94,8 @@ export const getAllWithSearch =
         items.length > 0 &&
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         await client.set(redisKey, JSON.stringify(items), "EX", 3600);
       }
@@ -86,6 +113,20 @@ export const getOne =
     try {
       const { id, fk_empresa } = req.params;
 
+      if (hasFkEmpresa) {
+        const empresa = await Empresa.findOne({
+          where: { emp_codigo: fk_empresa },
+        });
+
+        const clienteEmpresa = empresa.get();
+
+        if (clienteEmpresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      }
+
       if (!client.isOpen) {
         await client.connect();
       }
@@ -95,7 +136,8 @@ export const getOne =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         const reply = await client.get(redisKey);
         if (reply) {
@@ -120,7 +162,8 @@ export const getOne =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
       }
@@ -137,6 +180,20 @@ export const create =
   async (req, res) => {
     try {
       const { fk_empresa } = req.params;
+
+      if (hasFkEmpresa) {
+        const empresa = await Empresa.findOne({
+          where: { emp_codigo: fk_empresa },
+        });
+
+        const clienteEmpresa = empresa.get();
+
+        if (clienteEmpresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      }
 
       const data = hasFkEmpresa ? { ...req.body, fk_empresa } : { ...req.body };
 
@@ -157,7 +214,8 @@ export const create =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         const redisKey = `${Model.name}:${item.id}`;
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
@@ -174,6 +232,20 @@ export const update =
   async (req, res) => {
     try {
       const { id, fk_empresa } = req.params;
+
+      if (hasFkEmpresa) {
+        const empresa = await Empresa.findOne({
+          where: { emp_codigo: fk_empresa },
+        });
+
+        const clienteEmpresa = empresa.get();
+
+        if (clienteEmpresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      }
 
       const where = hasFkEmpresa
         ? { [idField]: id, fk_empresa }
@@ -198,7 +270,8 @@ export const update =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         const redisKey = `${Model.name}:${id}`;
         await client.set(redisKey, JSON.stringify(item), "EX", 3600);
@@ -237,7 +310,8 @@ export const remove =
       if (
         Model.name !== "productos" &&
         Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas"
+        Model.name !== "movimientos_cajas" &&
+        Model.name !== "empresas"
       ) {
         const redisKey = `${Model.name}:${id}`;
         await client.del(redisKey);

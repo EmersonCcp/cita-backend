@@ -25,13 +25,19 @@ export const login = async (req, res) => {
     });
 
     if (user) {
-      const passwordValid = await bcrypt.compare(password, user.password);
-
       const empresa = await Empresa.findOne({
         where: { emp_codigo: user.fk_empresa },
       });
 
       const clienteEmpresa = empresa.get();
+
+      if (clienteEmpresa.emp_estado === false) {
+        return res
+          .status(200)
+          .json({ ok: false, error: "Cuenta Desabilitada" });
+      }
+
+      const passwordValid = await bcrypt.compare(password, user.password);
 
       if (passwordValid) {
         const token = jwt.sign(
@@ -49,12 +55,12 @@ export const login = async (req, res) => {
       } else {
         return res
           .status(200)
-          .json({ ok: false, error: "Contraseña incorrecta" });
+          .json({ ok: false, error: "Usuario o Contraseña incorrecta" });
       }
     } else {
       return res
         .status(200)
-        .json({ ok: false, error: "Usuario no encontrado" });
+        .json({ ok: false, error: "Usuario o Contraseña incorrecta" });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });

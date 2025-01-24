@@ -9,10 +9,10 @@ import {
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
-router.get("/planes/:limit/:pagination/:query", authenticateToken, getPlanes);
-router.get("/planes/:id", authenticateToken, getPlan);
+router.get("/planes/:limit/:pagination/:query", getPlanes);
+router.get("/planes/:id", getPlan);
 router.post("/planes", createPlan);
-router.put("/planes/:id", authenticateToken, updatePlan);
-router.delete("/planes/:id", authenticateToken, deletePlan);
+router.put("/planes/:id", updatePlan);
+router.delete("/planes/:id", deletePlan);
 
 export default router;

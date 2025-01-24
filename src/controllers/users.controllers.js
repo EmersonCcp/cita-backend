@@ -12,7 +12,7 @@ export const getUsers = async (req, res) => {
 
     res.json({ ok: true, users });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };
 
@@ -26,14 +26,14 @@ export const getUser = async (req, res) => {
 
     res.json({ ok: true, user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };
 
 export const createUser = async (req, res) => {
   try {
     let { username, email, password, roles } = req.body;
-    const { fk_empresa } = req.params; // Obtener fk_empresa de req.params
+    const { fk_empresa } = req.params;
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt);
 
@@ -42,12 +42,12 @@ export const createUser = async (req, res) => {
       email,
       password,
       roles,
-      fk_empresa, // Usar fk_empresa del req.params
+      fk_empresa,
     });
 
     res.json({ ok: true, newUser });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };
 
@@ -88,7 +88,7 @@ export const updateEmail = async (req, res) => {
       message: "Email actualizado correctamente.",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };
 
@@ -109,7 +109,7 @@ export const updateUser = async (req, res) => {
 
     res.json({ ok: true, user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };
 
@@ -126,6 +126,6 @@ export const deleteUser = async (req, res) => {
 
     res.json({ ok: true });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json({ message: error.message });
   }
 };

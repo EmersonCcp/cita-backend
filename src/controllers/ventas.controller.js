@@ -12,10 +12,25 @@ import { sequelize } from "../database/database.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 import { client } from "../index.js";
+import { Empresa } from "../models/Empresa.js";
 
 export const getVentas = async (req, res) => {
   try {
     const { limit, pagination, query, fk_empresa } = req.params;
+
+    if (fk_empresa) {
+      const empresa = await Empresa.findOne({
+        where: { emp_codigo: fk_empresa },
+      });
+
+      const clienteEmpresa = empresa.get();
+
+      if (clienteEmpresa.emp_estado === false) {
+        return res
+          .status(200)
+          .json({ ok: false, message: "Cuenta Desabilitada" });
+      }
+    }
 
     const redisKey = `${Venta.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
