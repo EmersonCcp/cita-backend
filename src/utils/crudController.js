@@ -35,7 +35,19 @@ export const getAllWithSearch =
     try {
       const { limit, pagination, query, fk_empresa } = req.params;
 
-      if (hasFkEmpresa) {
+      const keyEmpresa = `empresas:${fk_empresa}`;
+
+      const keyEmpresaFound = await client.get(keyEmpresa);
+
+      if (keyEmpresaFound) {
+        const empresa = JSON.parse(keyEmpresaFound);
+        console.log({ empresa });
+        if (empresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      } else if (hasFkEmpresa) {
         const empresa = await Empresa.findOne({
           where: { emp_codigo: fk_empresa },
         });
@@ -49,25 +61,25 @@ export const getAllWithSearch =
         }
       }
 
-      if (!client.isOpen) {
-        await client.connect();
-      }
+      // if (!client.isOpen) {
+      //   await client.connect();
+      // }
 
-      const redisKey = `${Model.name}:list:${
-        hasFkEmpresa ? `fk_empresa=${fk_empresa}:` : ""
-      }query=${query}:limit=${limit}:pagination=${pagination}`;
+      // const redisKey = `${Model.name}:list:${
+      //   hasFkEmpresa ? `fk_empresa=${fk_empresa}:` : ""
+      // }query=${query}:limit=${limit}:pagination=${pagination}`;
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        const reply = await client.get(redisKey);
-        if (reply) {
-          return res.status(200).json({ ok: true, items: JSON.parse(reply) });
-        }
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas" &&
+      //   Model.name !== "empresas"
+      // ) {
+      //   const reply = await client.get(redisKey);
+      //   if (reply) {
+      //     return res.status(200).json({ ok: true, items: JSON.parse(reply) });
+      //   }
+      // }
 
       let queryAdd = hasFkEmpresa ? `WHERE fk_empresa = ${fk_empresa} ` : "";
 
@@ -90,15 +102,15 @@ export const getAllWithSearch =
         type: QueryTypes.SELECT,
       });
 
-      if (
-        items.length > 0 &&
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        await client.set(redisKey, JSON.stringify(items), "EX", 3600);
-      }
+      // if (
+      //   items.length > 0 &&
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas" &&
+      //   Model.name !== "empresas"
+      // ) {
+      //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+      // }
 
       res.status(200).json({ ok: true, items });
     } catch (error) {
@@ -113,7 +125,20 @@ export const getOne =
     try {
       const { id, fk_empresa } = req.params;
 
-      if (hasFkEmpresa) {
+      const keyEmpresa = `empresas:${fk_empresa}`;
+
+      const keyEmpresaFound = await client.get(keyEmpresa);
+
+      if (keyEmpresaFound) {
+        const empresa = JSON.parse(keyEmpresaFound);
+        console.log({ empresa });
+
+        if (empresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      } else if (hasFkEmpresa) {
         const empresa = await Empresa.findOne({
           where: { emp_codigo: fk_empresa },
         });
@@ -131,23 +156,22 @@ export const getOne =
         await client.connect();
       }
 
-      const redisKey = `${Model.name}:${id}`;
+      // const redisKey = `${Model.name}:${id}`;
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        const reply = await client.get(redisKey);
-        if (reply) {
-          try {
-            return res.json({ ok: true, item: JSON.parse(reply) });
-          } catch (parseError) {
-            console.error("Error parsing Redis reply:", parseError);
-          }
-        }
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas"
+      // ) {
+      //   const reply = await client.get(redisKey);
+      //   if (reply) {
+      //     try {
+      //       return res.json({ ok: true, item: JSON.parse(reply) });
+      //     } catch (parseError) {
+      //       console.error("Error parsing Redis reply:", parseError);
+      //     }
+      //   }
+      // }
 
       const where = hasFkEmpresa
         ? { [idField]: id, fk_empresa }
@@ -159,14 +183,13 @@ export const getOne =
         return res.status(404).json({ message: "Record not found" });
       }
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas"
+      // ) {
+      //   await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      // }
 
       res.json({ ok: true, item });
     } catch (error) {
@@ -181,7 +204,19 @@ export const create =
     try {
       const { fk_empresa } = req.params;
 
-      if (hasFkEmpresa) {
+      const keyEmpresa = `empresas:${fk_empresa}`;
+
+      const keyEmpresaFound = await client.get(keyEmpresa);
+
+      if (keyEmpresaFound) {
+        const empresa = JSON.parse(keyEmpresaFound);
+        console.log({ empresa });
+        if (empresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      } else if (hasFkEmpresa) {
         const empresa = await Empresa.findOne({
           where: { emp_codigo: fk_empresa },
         });
@@ -199,27 +234,26 @@ export const create =
 
       const item = await Model.create(data);
 
-      if (!item) {
-        return res
-          .status(200)
-          .json({ ok: false, message: "Error al crear el registro." });
-      }
+      // if (!item) {
+      //   return res
+      //     .status(200)
+      //     .json({ ok: false, message: "Error al crear el registro." });
+      // }
 
-      if (hasFkEmpresa) {
-        await deleteKeysByPattern(
-          `${Model.name}:list:fk_empresa=${fk_empresa}:`
-        );
-      }
+      // if (hasFkEmpresa) {
+      //   await deleteKeysByPattern(
+      //     `${Model.name}:list:fk_empresa=${fk_empresa}:`
+      //   );
+      // }
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        const redisKey = `${Model.name}:${item.id}`;
-        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas"
+      // ) {
+      //   const redisKey = `${Model.name}:${item.id}`;
+      //   await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      // }
 
       res.json({ ok: true, item });
     } catch (error) {
@@ -233,7 +267,19 @@ export const update =
     try {
       const { id, fk_empresa } = req.params;
 
-      if (hasFkEmpresa) {
+      const keyEmpresa = `empresas:${fk_empresa}`;
+
+      const keyEmpresaFound = await client.get(keyEmpresa);
+
+      if (keyEmpresaFound) {
+        const empresa = JSON.parse(keyEmpresaFound);
+        console.log({ empresa });
+        if (empresa.emp_estado === false) {
+          return res
+            .status(200)
+            .json({ ok: false, message: "Cuenta Desabilitada" });
+        }
+      } else if (hasFkEmpresa) {
         const empresa = await Empresa.findOne({
           where: { emp_codigo: fk_empresa },
         });
@@ -261,21 +307,20 @@ export const update =
 
       const item = await Model.findOne({ where });
 
-      if (hasFkEmpresa) {
-        await deleteKeysByPattern(
-          `${Model.name}:list:fk_empresa=${fk_empresa}:`
-        );
-      }
+      // if (hasFkEmpresa) {
+      //   await deleteKeysByPattern(
+      //     `${Model.name}:list:fk_empresa=${fk_empresa}:`
+      //   );
+      // }
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        const redisKey = `${Model.name}:${id}`;
-        await client.set(redisKey, JSON.stringify(item), "EX", 3600);
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas"
+      // ) {
+      //   const redisKey = `${Model.name}:${id}`;
+      //   await client.set(redisKey, JSON.stringify(item), "EX", 3600);
+      // }
 
       res.json({ ok: true, item });
     } catch (error) {
@@ -301,21 +346,20 @@ export const remove =
           .json({ ok: false, message: "Error al eliminar el registro" });
       }
 
-      if (hasFkEmpresa) {
-        await deleteKeysByPattern(
-          `${Model.name}:list:fk_empresa=${fk_empresa}:`
-        );
-      }
+      // if (hasFkEmpresa) {
+      //   await deleteKeysByPattern(
+      //     `${Model.name}:list:fk_empresa=${fk_empresa}:`
+      //   );
+      // }
 
-      if (
-        Model.name !== "productos" &&
-        Model.name !== "cajas" &&
-        Model.name !== "movimientos_cajas" &&
-        Model.name !== "empresas"
-      ) {
-        const redisKey = `${Model.name}:${id}`;
-        await client.del(redisKey);
-      }
+      // if (
+      //   Model.name !== "productos" &&
+      //   Model.name !== "cajas" &&
+      //   Model.name !== "movimientos_cajas"
+      // ) {
+      //   const redisKey = `${Model.name}:${id}`;
+      //   await client.del(redisKey);
+      // }
 
       res.json({ ok: true, message: "Record deleted successfully" });
     } catch (error) {

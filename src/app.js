@@ -26,6 +26,7 @@ import pdfGeneratorRoutes from "./routes/pdf-generator.routes.js";
 import utilsRoutes from "./routes/utils.routes.js";
 import cajaRoutes from "./routes/cajas.routes.js";
 import movimientosCajasRoutes from "./routes/movimientos_cajas.routes.js";
+import asistenciasRoutes from "./routes/asistencias.routes.js";
 
 //library
 import express from "express";
@@ -113,6 +114,7 @@ app.use("/v1/api", pdfGeneratorRoutes);
 app.use("/v1/api", utilsRoutes);
 app.use("/v1/api", cajaRoutes);
 app.use("/v1/api", movimientosCajasRoutes);
+app.use("/v1/api", asistenciasRoutes);
 
 export default app;
 export { io };

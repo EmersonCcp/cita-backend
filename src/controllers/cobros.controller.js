@@ -23,7 +23,7 @@ export const getCobrosWithSearch = async (req, res) => {
       }
     }
 
-    const redisKey = `${Cobro.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+    // const redisKey = `${Cobro.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -77,9 +77,9 @@ export const getCobrosWithSearch = async (req, res) => {
       replacements: { fk_empresa }, // Pasar el valor de fk_empresa a la consulta
     });
 
-    if (items.length > 0) {
-      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
-    }
+    // if (items.length > 0) {
+    //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    // }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {

@@ -6,6 +6,7 @@ const rolesEnum = [
   "ADMIN",
   "CLIENTES",
   "FUNCIONARIOS",
+  "ASISTENCIAS",
   "SERVICIOS",
   "CITAS",
   "PROVEEDORES",

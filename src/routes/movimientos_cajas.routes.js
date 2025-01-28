@@ -11,11 +11,20 @@ const router = Router();
 
 router.get(
   "/movimientos_cajas/:fk_empresa/:limit/:pagination/:query",
+  authenticateToken,
   getEntities
 );
-router.get("/movimientos_cajas/:fk_empresa/:id", getEntity);
-router.post("/movimientos_cajas/:fk_empresa", createEntity);
-router.put("/movimientos_cajas/:fk_empresa/:id", updateEntity);
-router.delete("/movimientos_cajas/:fk_empresa/:id", deleteEntity);
+router.get("/movimientos_cajas/:fk_empresa/:id", authenticateToken, getEntity);
+router.post("/movimientos_cajas/:fk_empresa", authenticateToken, createEntity);
+router.put(
+  "/movimientos_cajas/:fk_empresa/:id",
+  authenticateToken,
+  updateEntity
+);
+router.delete(
+  "/movimientos_cajas/:fk_empresa/:id",
+  authenticateToken,
+  deleteEntity
+);
 
 export default router;

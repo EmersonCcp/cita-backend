@@ -36,7 +36,7 @@ export const DetalleVenta = sequelize.define(
     },
 
     dv_cantidad: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
 

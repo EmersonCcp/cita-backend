@@ -13,6 +13,8 @@ import { errorHandler } from "../utils/errorHandler.js";
 import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 import { client } from "../index.js";
 import { Empresa } from "../models/Empresa.js";
+import { DetalleVenta } from "../models/DetalleVenta.js";
+import { Producto } from "../models/Producto.js";
 
 export const getVentas = async (req, res) => {
   try {
@@ -32,7 +34,7 @@ export const getVentas = async (req, res) => {
       }
     }
 
-    const redisKey = `${Venta.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+    // const redisKey = `${Venta.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -82,9 +84,9 @@ export const getVentas = async (req, res) => {
       replacements: { fk_empresa }, // Pasar el valor de fk_empresa como reemplazo
     });
 
-    if (items.length > 0) {
-      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
-    }
+    // if (items.length > 0) {
+    //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    // }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {
@@ -127,7 +129,7 @@ export const deleteVenta = async (req, res) => {
         // Agrupar productos por ID y sumar cantidades
         const productosAgrupados = detalles.reduce(
           (acc, { fk_producto, dv_cantidad }) => {
-            acc[fk_producto] = (acc[fk_producto] || 0) + dv_cantidad;
+            acc[fk_producto] = (acc[fk_producto] || 0) + Number(dv_cantidad);
             return acc;
           },
           {}
@@ -199,14 +201,14 @@ export const deleteVenta = async (req, res) => {
     }
 
     // Limpiar las claves en Redis
-    await deleteKeysByPattern(
-      `${Venta.name}:list:fk_empresa=${fk_empresa}:`,
-      Venta.name,
-      fk_empresa
-    );
+    // await deleteKeysByPattern(
+    //   `${Venta.name}:list:fk_empresa=${fk_empresa}:`,
+    //   Venta.name,
+    //   fk_empresa
+    // );
 
-    const redisKey = `${Venta.name}:${id}`;
-    await client.del(redisKey);
+    // const redisKey = `${Venta.name}:${id}`;
+    // await client.del(redisKey);
 
     await transaction.commit();
 
@@ -214,5 +216,100 @@ export const deleteVenta = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     errorHandler(res, error);
+  }
+};
+
+export const actualizarEstadoEntrega = async (req, res) => {
+  const t = await sequelize.transaction(); // Inicia la transacción
+  try {
+    const { ventaId, nuevoEstado } = req.body;
+
+    // Obtener la venta actual y su estado
+    const venta = await Venta.findByPk(ventaId, { transaction: t });
+    if (!venta) throw new Error("Venta no encontrada");
+
+    // Validar cambios de estado
+    const estadoAnterior = venta.ven_estado_entrega;
+    if (estadoAnterior === nuevoEstado) {
+      throw new Error("El estado ya es el mismo");
+    }
+
+    // Actualizar el stock si es necesario
+    await handleStockUpdate(estadoAnterior, nuevoEstado, ventaId, t);
+
+    // Actualizar el estado de la venta
+    venta.ven_estado_entrega = nuevoEstado;
+    await venta.save({ transaction: t });
+
+    // Confirmar la transacción
+    await t.commit();
+
+    return res.json({
+      ok: true,
+      message: "Estado de entrega de la venta actualizado correctamente",
+    });
+  } catch (error) {
+    // Revertir la transacción en caso de error
+    await t.rollback();
+    return res.json({ ok: false, message: error.message });
+  }
+};
+
+/**
+ * Manejar la actualización del stock según el cambio de estado
+ */
+const handleStockUpdate = async (estadoAnterior, estadoNuevo, ventaId, t) => {
+  // Si no hay cambios relevantes al stock, salimos
+  if (estadoAnterior === estadoNuevo) return;
+
+  // Obtener detalles de la compra
+  const detallesVenta = await DetalleVenta.findAll({
+    where: { fk_venta: ventaId },
+    transaction: t,
+  });
+
+  console.log({ detallesVenta });
+
+  if (!detallesVenta || detallesVenta.length === 0) {
+    throw new Error("No se encontraron detalles de la venta.");
+  }
+
+  // Agrupar productos por ID y sumar cantidades
+  const productosAgrupados = detallesVenta.reduce((acc, detalle) => {
+    if (!acc[detalle.fk_producto]) {
+      acc[detalle.fk_producto] = Number(detalle.dv_cantidad);
+    } else {
+      acc[detalle.fk_producto] += Number(detalle.dv_cantidad);
+    }
+    return acc;
+  }, {});
+
+  console.log({ productosAgrupados });
+
+  // Actualizar el stock según el cambio de estado
+  for (const [fk_producto, cantidad] of Object.entries(productosAgrupados)) {
+    const producto = await Producto.findByPk(fk_producto, { transaction: t });
+    if (!producto) continue;
+
+    if (
+      estadoAnterior === "entregado" &&
+      (estadoNuevo === "pendiente" ||
+        estadoNuevo === "proceso" ||
+        estadoNuevo === "cancelado")
+    ) {
+      // Restar el stock
+      producto.prod_cantidad += cantidad;
+    } else if (
+      (estadoAnterior === "pendiente" ||
+        estadoAnterior === "proceso" ||
+        estadoAnterior === "cancelado") &&
+      estadoNuevo === "entregado"
+    ) {
+      // Sumar el stock
+      producto.prod_cantidad -= cantidad;
+    }
+
+    // Guardar el producto actualizado
+    await producto.save({ transaction: t });
   }
 };

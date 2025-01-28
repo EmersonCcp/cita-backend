@@ -35,13 +35,13 @@ export const getAllWithSearch = async (req, res) => {
     const tableName = "citas";
 
     // Generar una clave única para Redis
-    const redisKey = `${Cita.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+    // const redisKey = `${Cita.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     // Intentar obtener los datos desde Redis
-    const reply = await client.get(redisKey);
-    if (reply) {
-      return res.status(200).json({ ok: true, items: JSON.parse(reply) });
-    }
+    // const reply = await client.get(redisKey);
+    // if (reply) {
+    //   return res.status(200).json({ ok: true, items: JSON.parse(reply) });
+    // }
 
     let queryAdd = ``;
     if (query && query !== ":query") {
@@ -84,9 +84,9 @@ export const getAllWithSearch = async (req, res) => {
       replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
 
-    if (items.length > 0) {
-      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
-    }
+    // if (items.length > 0) {
+    //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    // }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {

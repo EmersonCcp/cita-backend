@@ -33,7 +33,7 @@ export const DetalleCompra = sequelize.define(
       onDelete: "RESTRICT",
     },
     dc_cantidad: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     dc_precio_unitario: {

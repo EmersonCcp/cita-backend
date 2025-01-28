@@ -5,6 +5,7 @@ import {
   createVenta,
   updateVenta,
   deleteVenta,
+  actualizarEstadoEntrega,
 } from "../controllers/ventas.controller.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
@@ -17,6 +18,11 @@ router.get(
 );
 router.get("/ventas/:fk_empresa/:id", authenticateToken, getVenta);
 router.post("/ventas/:fk_empresa", authenticateToken, createVenta);
+router.post(
+  "/ventas/:fk_empresa/change-estado",
+  authenticateToken,
+  actualizarEstadoEntrega
+);
 router.put("/ventas/:fk_empresa/:id", authenticateToken, updateVenta);
 router.delete("/ventas/:fk_empresa/:id", authenticateToken, deleteVenta);
 

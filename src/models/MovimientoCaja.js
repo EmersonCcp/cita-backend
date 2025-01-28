@@ -51,7 +51,7 @@ export const MovimientoCaja = sequelize.define("movimientos_cajas", {
       model: Caja,
       key: "caja_codigo",
     },
-    onDelete: "CASCADE", // Si se elimina la caja, también los movimientos
+    onDelete: "RESTRICT", // Si se elimina la caja, también los movimientos
   },
 
   fk_empresa: {
@@ -65,4 +65,4 @@ export const MovimientoCaja = sequelize.define("movimientos_cajas", {
   },
 });
 
-MovimientoCaja.sync({ force: false });
+MovimientoCaja.sync({ alter: false });

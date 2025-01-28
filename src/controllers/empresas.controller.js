@@ -8,6 +8,8 @@ import {
 } from "../utils/crudController.js";
 import { stateEmpresa } from "../app.js";
 import { errorHandler } from "../utils/errorHandler.js";
+import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
+import { client } from "../index.js";
 
 const searchableFields = ["p.emp_nombre", "p.emp_descripcion", "p.emp_pais"];
 
@@ -37,6 +39,12 @@ export const updateEmpresa = async (req, res) => {
     }
 
     const item = await Empresa.findOne({ where: { emp_codigo: id } });
+
+    await deleteKeysByPattern(`${Empresa.name}:list:`);
+
+    const redisKey = `${Empresa.name}:${id}`;
+
+    await client.set(redisKey, JSON.stringify(item), "EX", 3600);
 
     stateEmpresa(item);
 

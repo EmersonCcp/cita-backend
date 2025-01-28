@@ -33,7 +33,7 @@ export const getCompras = async (req, res) => {
       }
     }
 
-    const redisKey = `${Compra.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
+    // const redisKey = `${Compra.name}:list:fk_empresa=${fk_empresa}:query=${query}:limit=${limit}:pagination=${pagination}`;
 
     let queryAdd = ``;
     if (query !== ":query") {
@@ -82,9 +82,9 @@ export const getCompras = async (req, res) => {
       replacements: { fk_empresa }, // Se usa para pasar el valor de fk_empresa
     });
 
-    if (items.length > 0) {
-      await client.set(redisKey, JSON.stringify(items), "EX", 3600);
-    }
+    // if (items.length > 0) {
+    //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);
+    // }
 
     res.status(200).json({ ok: true, items });
   } catch (error) {
@@ -127,7 +127,7 @@ export const deleteCompra = async (req, res) => {
         // Agrupar productos por ID y sumar cantidades
         const productosAgrupados = detalles.reduce(
           (acc, { fk_producto, dc_cantidad }) => {
-            acc[fk_producto] = (acc[fk_producto] || 0) + dc_cantidad;
+            acc[fk_producto] = (acc[fk_producto] || 0) + Number(dc_cantidad);
             return acc;
           },
           {}
@@ -199,14 +199,14 @@ export const deleteCompra = async (req, res) => {
     }
 
     // Limpiar las claves en Redis
-    await deleteKeysByPattern(
-      `${Compra.name}:list:fk_empresa=${fk_empresa}:`,
-      Compra.name,
-      fk_empresa
-    );
+    // await deleteKeysByPattern(
+    //   `${Compra.name}:list:fk_empresa=${fk_empresa}:`,
+    //   Compra.name,
+    //   fk_empresa
+    // );
 
-    const redisKey = `${Compra.name}:${id}`;
-    await client.del(redisKey);
+    // const redisKey = `${Compra.name}:${id}`;
+    // await client.del(redisKey);
 
     await transaction.commit();
 
@@ -217,71 +217,97 @@ export const deleteCompra = async (req, res) => {
   }
 };
 
-export const actualizarEstadoEntrega = async (compraId, nuevoEstado) => {
+export const actualizarEstadoEntrega = async (req, res) => {
+  const t = await sequelize.transaction(); // Inicia la transacción
   try {
+    const { compraId, nuevoEstado } = req.body;
+
     // Obtener la compra actual y su estado
-    const compra = await Compra.findByPk(compraId);
+    const compra = await Compra.findByPk(compraId, { transaction: t });
     if (!compra) throw new Error("Compra no encontrada");
 
-    // Validar cambios de estado
     const estadoAnterior = compra.com_estado_entrega;
+
     if (estadoAnterior === nuevoEstado) {
       throw new Error("El estado ya es el mismo");
     }
 
-    // Obtener detalles de la compra
-    const detallesCompra = await DetalleCompra.findAll({
-      where: { fk_compra: compraId },
-    });
-
-    // Realizar acciones según el nuevo estado
-    switch (nuevoEstado) {
-      case "pendiente":
-        // No afecta el stock
-        break;
-
-      case "proceso":
-        // Si se requiere, puedes marcar productos como reservados
-        break;
-
-      case "entregado":
-        if (estadoAnterior !== "entregado") {
-          // Actualizar el stock de cada producto
-          for (const detalle of detallesCompra) {
-            const producto = await Producto.findByPk(detalle.fk_producto);
-            if (!producto) continue;
-
-            // Aumentar el stock
-            producto.prod_cantidad += detalle.dc_cantidad;
-            await producto.save();
-          }
-        }
-        break;
-
-      case "cancelado":
-        if (estadoAnterior === "entregado") {
-          // Revertir el stock
-          for (const detalle of detallesCompra) {
-            const producto = await Producto.findByPk(detalle.fk_producto);
-            if (!producto) continue;
-
-            // Reducir el stock
-            producto.prod_cantidad -= detalle.dc_cantidad;
-            await producto.save();
-          }
-        }
-        break;
-
-      default:
-        throw new Error("Estado no válido");
-    }
+    // Actualizar el stock si es necesario
+    await handleStockUpdate(estadoAnterior, nuevoEstado, compraId, t);
 
     // Actualizar el estado de la compra
     compra.com_estado_entrega = nuevoEstado;
-    await compra.save();
+    await compra.save({ transaction: t });
 
-    return { ok: true, message: "Estado de entrega actualizado correctamente" };
+    // Confirmar la transacción
+    await t.commit();
+
+    return res.json({
+      ok: true,
+      message: "Estado de entrega actualizado correctamente",
+    });
   } catch (error) {
-    return { ok: false, message: error.message };
+    // Revertir la transacción en caso de error
+    await t.rollback();
+    return res.json({ ok: false, message: error.message });
+  }
+};
+
+/**
+ * Manejar la actualización del stock según el cambio de estado
+ */
+const handleStockUpdate = async (estadoAnterior, estadoNuevo, compraId, t) => {
+  // Si no hay cambios relevantes al stock, salimos
+  if (estadoAnterior === estadoNuevo) return;
+
+  // Obtener detalles de la compra
+  const detallesCompra = await DetalleCompra.findAll({
+    where: { fk_compra: compraId },
+    transaction: t,
+  });
+
+  console.log({ detallesCompra });
+
+  if (!detallesCompra || detallesCompra.length === 0) {
+    throw new Error("No se encontraron detalles de la compra.");
+  }
+
+  // Agrupar productos por ID y sumar cantidades
+  const productosAgrupados = detallesCompra.reduce((acc, detalle) => {
+    if (!acc[detalle.fk_producto]) {
+      acc[detalle.fk_producto] = Number(detalle.dc_cantidad);
+    } else {
+      acc[detalle.fk_producto] += Number(detalle.dc_cantidad);
+    }
+    return acc;
+  }, {});
+
+  console.log({ productosAgrupados });
+
+  // Actualizar el stock según el cambio de estado
+  for (const [fk_producto, cantidad] of Object.entries(productosAgrupados)) {
+    const producto = await Producto.findByPk(fk_producto, { transaction: t });
+    if (!producto) continue;
+
+    if (
+      estadoAnterior === "entregado" &&
+      (estadoNuevo === "pendiente" ||
+        estadoNuevo === "proceso" ||
+        estadoNuevo === "cancelado")
+    ) {
+      // Restar el stock
+      producto.prod_cantidad -= cantidad;
+    } else if (
+      (estadoAnterior === "pendiente" ||
+        estadoAnterior === "proceso" ||
+        estadoAnterior === "cancelado") &&
+      estadoNuevo === "entregado"
+    ) {
+      // Sumar el stock
+      producto.prod_cantidad += cantidad;
+    }
+
+    // Guardar el producto actualizado
+    await producto.save({ transaction: t });
   }
 };

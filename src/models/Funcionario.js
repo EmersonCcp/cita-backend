@@ -49,6 +49,12 @@ export const Funcionario = sequelize.define("funcionarios", {
     allowNull: true,
   },
 
+  fun_check_asistencia: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: true,
+  },
+
   fun_salario: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
