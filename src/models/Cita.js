@@ -4,6 +4,7 @@ import { sequelize } from "../database/database.js";
 import { Cliente } from "./Cliente.js";
 import { Funcionario } from "./Funcionario.js";
 import { Empresa } from "./Empresa.js";
+import { Caja } from "./Caja.js";
 
 export const Cita = sequelize.define("citas", {
   cita_codigo: {
@@ -58,6 +59,15 @@ export const Cita = sequelize.define("citas", {
       key: "emp_codigo",
     },
     onDelete: "RESTRICT",
+  },
+  fk_caja: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Caja,
+      key: "caja_codigo",
+    },
+    onDelete: "RESTRICT", // Si se elimina la caja, también los movimientos
   },
 });
 

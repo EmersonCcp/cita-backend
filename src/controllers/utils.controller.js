@@ -3,7 +3,6 @@ import axios from "axios";
 export const getImageBase64 = async (req, res) => {
   try {
     const { imageUrl } = req.body;
-    console.log(req.body);
 
     const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
     let base64Image = Buffer.from(response.data, "binary").toString("base64");

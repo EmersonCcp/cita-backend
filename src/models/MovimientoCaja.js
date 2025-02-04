@@ -40,7 +40,7 @@ export const MovimientoCaja = sequelize.define("movimientos_cajas", {
 
   mc_tipo_operacion: {
     // Tipo de operación: "venta" o "compra"
-    type: DataTypes.ENUM("venta", "compra"),
+    type: DataTypes.STRING, //venta,compra,cita,pago
     allowNull: false,
   },
 

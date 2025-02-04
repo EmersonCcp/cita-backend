@@ -125,7 +125,6 @@ export const authenticateToken = (req, res) => {
     }
 
     jwt.verify(token, "holamibro", (err, user) => {
-      console.log(err, user);
       if (err) {
         return res.status(403).send("Invalid token");
       }

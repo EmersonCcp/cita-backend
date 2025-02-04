@@ -41,7 +41,6 @@ export const getAllWithSearch =
 
       if (keyEmpresaFound) {
         const empresa = JSON.parse(keyEmpresaFound);
-        console.log({ empresa });
         if (empresa.emp_estado === false) {
           return res
             .status(200)
@@ -131,7 +130,6 @@ export const getOne =
 
       if (keyEmpresaFound) {
         const empresa = JSON.parse(keyEmpresaFound);
-        console.log({ empresa });
 
         if (empresa.emp_estado === false) {
           return res
@@ -210,7 +208,6 @@ export const create =
 
       if (keyEmpresaFound) {
         const empresa = JSON.parse(keyEmpresaFound);
-        console.log({ empresa });
         if (empresa.emp_estado === false) {
           return res
             .status(200)
@@ -273,7 +270,6 @@ export const update =
 
       if (keyEmpresaFound) {
         const empresa = JSON.parse(keyEmpresaFound);
-        console.log({ empresa });
         if (empresa.emp_estado === false) {
           return res
             .status(200)

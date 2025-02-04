@@ -266,8 +266,6 @@ const handleStockUpdate = async (estadoAnterior, estadoNuevo, compraId, t) => {
     transaction: t,
   });
 
-  console.log({ detallesCompra });
-
   if (!detallesCompra || detallesCompra.length === 0) {
     throw new Error("No se encontraron detalles de la compra.");
   }
@@ -281,8 +279,6 @@ const handleStockUpdate = async (estadoAnterior, estadoNuevo, compraId, t) => {
     }
     return acc;
   }, {});
-
-  console.log({ productosAgrupados });
 
   // Actualizar el stock según el cambio de estado
   for (const [fk_producto, cantidad] of Object.entries(productosAgrupados)) {

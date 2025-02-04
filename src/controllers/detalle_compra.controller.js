@@ -87,8 +87,6 @@ async function actualizarEstadoEntrega(compraId, nuevoEstado) {
       where: { fk_compra: compraId },
     });
 
-    console.log("HOLIIIIIIIIIIIIIIIIIIIIIIIIIIII");
-
     // Realizar acciones según el nuevo estado
     switch (nuevoEstado) {
       case "pendiente":
@@ -151,8 +149,6 @@ export const getDetallesByCompraId = async (req, res) => {
         fk_compra: compraId,
       },
     });
-
-    console.log({ items });
 
     if (!items || items.length === 0) {
       return res.status(404).json({

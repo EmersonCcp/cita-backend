@@ -104,8 +104,6 @@ export const getDetallesByVentaId = async (req, res) => {
       },
     });
 
-    console.log({ items });
-
     if (!items || items.length === 0) {
       return res.status(404).json({
         message:

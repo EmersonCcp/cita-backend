@@ -10,13 +10,13 @@ import {
 
 export const getAllCitasServicios = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id, fk_empresa } = req.params;
     const items = await sequelize.query(
       `
       SELECT cs.cs_codigo, cs.fk_cita, cs.fk_servicio, cs.cs_monto, s.ser_nombre 
       FROM citas_servicios cs
       INNER JOIN servicios s ON cs.fk_servicio = s.ser_codigo
-      WHERE cs.fk_cita = ${id};
+      WHERE cs.fk_cita = ${id} AND cs.fk_empresa = ${fk_empresa};
       `,
       { type: sequelize.QueryTypes.SELECT }
     );
