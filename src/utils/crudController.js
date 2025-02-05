@@ -92,7 +92,7 @@ export const getAllWithSearch =
       const sql = `
       SELECT * FROM ${tableName} p
       ${queryAdd}
-      ORDER BY ${orderBy} ASC
+      ORDER BY ${orderBy} DESC 
       LIMIT ${limit}
       OFFSET ${pagination}
       `;
