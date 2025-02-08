@@ -28,20 +28,20 @@ import utilsRoutes from "./utils.routes.js";
 import cajaRoutes from "./cajas.routes.js";
 import movimientosCajasRoutes from "./movimientos_cajas.routes.js";
 import asistenciasRoutes from "./asistencias.routes.js";
-import fabricacionesRoutes from "./fabricaciones.routes.js";
-import detallesFabricacionesRoutes from "./detalle_fabricaciones.routes.js";
+// import fabricacionesRoutes from "./fabricaciones.routes.js";
+// import detallesFabricacionesRoutes from "./detalle_fabricaciones.routes.js";
 import tiposRoutes from "./tipos.routes.js";
-import tareaProductoRoutes from "./tarea_productos.routes.js";
+// import tareaProductoRoutes from "./tarea_productos.routes.js";
 
 const router = Router();
 
 // Definir todas las rutas
+router.use("/v1/api", userRoutes);
 router.use("/v1/api/auth", authenticationRoutes);
 router.use("/v1/api", citaRoutes);
 router.use("/v1/api", citaServicioRoutes);
 router.use("/v1/api", ventasRoutes);
 router.use("/v1/api", valesRoutes);
-router.use("/v1/api", userRoutes);
 router.use("/v1/api", sqlExecuteRoutes);
 router.use("/v1/api", servicioRoutes);
 router.use("/v1/api", proveedoresRoutes);
@@ -64,9 +64,9 @@ router.use("/v1/api", utilsRoutes);
 router.use("/v1/api", cajaRoutes);
 router.use("/v1/api", movimientosCajasRoutes);
 router.use("/v1/api", asistenciasRoutes);
-router.use("/v1/api", fabricacionesRoutes);
-router.use("/v1/api", detallesFabricacionesRoutes);
+// router.use("/v1/api", fabricacionesRoutes);
+// router.use("/v1/api", detallesFabricacionesRoutes);
 router.use("/v1/api", tiposRoutes);
-router.use("/v1/api", tareaProductoRoutes);
+// router.use("/v1/api", tareaProductoRoutes);
 
 export default router;

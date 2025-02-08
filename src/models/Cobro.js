@@ -31,15 +31,27 @@ export const Cobro = sequelize.define("cobros", {
     allowNull: false,
   },
 
-  fk_venta: {
+  cob_tipo_operacion: {
+    // Tipo de operación: "venta" o "compra" o "cita"
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  fk_operacion: {
+    // ID de la operación (venta o compra)
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: Venta,
-      key: "ven_codigo",
-    },
-    onDelete: "CASCADE",
   },
+
+  // fk_venta: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   references: {
+  //     model: Venta,
+  //     key: "ven_codigo",
+  //   },
+  //   onDelete: "CASCADE",
+  // },
 
   fk_empresa: {
     type: DataTypes.INTEGER,

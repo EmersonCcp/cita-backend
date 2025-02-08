@@ -43,4 +43,4 @@ export const CitaServicio = sequelize.define("citas_servicios", {
   },
 });
 
-CitaServicio.sync({ alter: false });
+CitaServicio.sync({ force: false });

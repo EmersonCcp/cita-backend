@@ -57,7 +57,7 @@ export const User = sequelize.define("users", {
     allowNull: true,
   },
   roles: {
-    type: DataTypes.ARRAY(DataTypes.ENUM(...rolesEnum)),
+    type: DataTypes.ARRAY(DataTypes.STRING),
     allowNull: true,
     defaultValue: ["DASHBOARD"],
   },
@@ -73,4 +73,4 @@ export const User = sequelize.define("users", {
   },
 });
 
-User.sync({ alter: false });
+User.sync({ force: false });

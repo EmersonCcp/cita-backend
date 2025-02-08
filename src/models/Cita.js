@@ -60,15 +60,15 @@ export const Cita = sequelize.define("citas", {
     },
     onDelete: "RESTRICT",
   },
-  fk_caja: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Caja,
-      key: "caja_codigo",
-    },
-    onDelete: "RESTRICT", // Si se elimina la caja, también los movimientos
-  },
+  // fk_caja: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   references: {
+  //     model: Caja,
+  //     key: "caja_codigo",
+  //   },
+  //   onDelete: "RESTRICT", // Si se elimina la caja, también los movimientos
+  // },
 });
 
-Cita.sync({ alter: false });
+Cita.sync({ force: false });

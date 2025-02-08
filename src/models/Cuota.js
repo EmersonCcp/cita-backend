@@ -20,7 +20,7 @@ export const Cuota = sequelize.define(
     },
     cuo_tipo_operacion: {
       // Tipo de operación: "venta" o "compra"
-      type: DataTypes.ENUM("venta", "compra"),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     cuo_numero: {

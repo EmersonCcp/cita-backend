@@ -31,15 +31,27 @@ export const Deuda = sequelize.define("deudas", {
     allowNull: false,
   },
 
-  fk_compra: {
+  deuda_tipo_operacion: {
+    // Tipo de operación: "venta" o "compra" o "cita"
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  fk_operacion: {
+    // ID de la operación (venta o compra)
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: Compra,
-      key: "com_codigo", // Cambia por el nombre correcto de la clave primaria de tu tabla de compras
-    },
-    onDelete: "CASCADE",
   },
+
+  // fk_compra: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   references: {
+  //     model: Compra,
+  //     key: "com_codigo", // Cambia por el nombre correcto de la clave primaria de tu tabla de compras
+  //   },
+  //   onDelete: "CASCADE",
+  // },
 
   fk_empresa: {
     type: DataTypes.INTEGER,
