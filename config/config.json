@@ -3,9 +3,9 @@
     "username": "postgres",
     "password": "9014",
     "database": "ensystem",
-    "host": "127.0.0.1",
+    "host": "postgres12",
     "dialect": "postgres",
-    "port": "5433"
+    "port": "5432"
   },
   "test": {
     "username": "root",

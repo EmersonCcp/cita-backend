@@ -34,7 +34,7 @@ module.exports = {
         allowNull: true,
       },
       roles: {
-        type: Sequelize.ARRAY(DataTypes.STRING), // Cambiado a JSON
+        type: Sequelize.ARRAY(Sequelize.STRING), // Cambiado a JSON
         allowNull: true,
         defaultValue: ["DASHBOARD"],
       },
