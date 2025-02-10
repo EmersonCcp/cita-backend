@@ -61,4 +61,4 @@ export const Cuota = sequelize.define(
   }
 );
 
-Cuota.sync({ alter: false });
+Cuota.sync({ force: false });

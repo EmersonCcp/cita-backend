@@ -18,11 +18,7 @@ router.get(
 router.get("/citas/:fk_empresa/:id", authenticateToken, getCita);
 router.post("/citas/:fk_empresa", authenticateToken, createCita);
 router.put("/citas/:fk_empresa/:id", authenticateToken, updateCita);
-router.put(
-  "/cita-estado/:fk_empresa/:id/:estado",
-  authenticateToken,
-  updateEstado
-);
+router.put("/citas/:fk_empresa/:id/:estado", authenticateToken, updateEstado);
 router.delete("/citas/:fk_empresa/:id", authenticateToken, deleteCita);
 
 export default router;

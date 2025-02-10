@@ -54,7 +54,11 @@ export const createCuota = async (req, res) => {
     const movimientoCajaObj = {
       mc_fecha: item.cuo_fecha_pago,
       mc_monto: item.cuo_monto,
-      mc_tipo: item.cuo_tipo_operacion == "venta" ? "ingreso" : "egreso",
+      mc_tipo:
+        (item.cuo_tipo_operacion == "venta") |
+        (item.cuo_tipo_operacion == "cita")
+          ? "ingreso"
+          : "egreso",
       fk_caja,
       fk_empresa,
       mc_descripcion: `${item.cuo_tipo_operacion}COD${item.fk_operacion}-Cuota ${item.cuo_numero}`,

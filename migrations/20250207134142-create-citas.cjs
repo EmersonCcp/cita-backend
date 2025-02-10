@@ -44,10 +44,28 @@ module.exports = {
         allowNull: false,
         defaultValue: "pendiente",
       },
+
       cita_obs: {
         type: Sequelize.STRING,
         allowNull: true,
       },
+
+      cita_num_cuotas: {
+        type: Sequelize.INTEGER,
+        defaultValue: 1,
+        allowNull: true,
+      },
+
+      cita_fecha_vencimiento: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+
+      cita_tipo_pago: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+
       fk_empresa: {
         type: Sequelize.INTEGER,
         allowNull: false,

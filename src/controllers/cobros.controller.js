@@ -57,7 +57,6 @@ export const getCobrosWithSearch = async (req, res) => {
             OR 
             (c.cob_tipo_operacion = 'cita' AND ct.fk_empresa = :fk_empresa)`;
     }
-    
 
     let sql = `
      SELECT 
@@ -88,16 +87,10 @@ LEFT JOIN clientes cli2 ON ct.fk_cliente = cli2.cli_codigo
       OFFSET ${pagination}
     `;
 
-    console.log(sql);
-    
-
     const items = await sequelize.query(sql, {
       type: QueryTypes.SELECT,
       replacements: { fk_empresa }, // Pasar el valor de fk_empresa a la consulta
     });
-
-    console.log(items);
-    
 
     // if (items.length > 0) {
     //   await client.set(redisKey, JSON.stringify(items), "EX", 3600);

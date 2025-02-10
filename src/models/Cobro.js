@@ -43,16 +43,6 @@ export const Cobro = sequelize.define("cobros", {
     allowNull: false,
   },
 
-  // fk_venta: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   references: {
-  //     model: Venta,
-  //     key: "ven_codigo",
-  //   },
-  //   onDelete: "CASCADE",
-  // },
-
   fk_empresa: {
     type: DataTypes.INTEGER,
     allowNull: false,

@@ -51,6 +51,19 @@ export const Cita = sequelize.define("citas", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  cita_num_cuotas: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+
+  cita_fecha_vencimiento: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  cita_tipo_pago: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   fk_empresa: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -60,15 +73,6 @@ export const Cita = sequelize.define("citas", {
     },
     onDelete: "RESTRICT",
   },
-  // fk_caja: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   references: {
-  //     model: Caja,
-  //     key: "caja_codigo",
-  //   },
-  //   onDelete: "RESTRICT", // Si se elimina la caja, también los movimientos
-  // },
 });
 
 Cita.sync({ force: false });

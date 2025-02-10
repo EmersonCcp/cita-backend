@@ -46,25 +46,37 @@ export const getDeudasWithSearch = async (req, res) => {
     let empresaCondition = ``;
     if (fk_empresa) {
       empresaCondition = queryAdd
-        ? `AND v.fk_empresa = :fk_empresa` // Si ya hay condiciones, agrega con AND
-        : `WHERE v.fk_empresa = :fk_empresa`; // Si no hay condiciones, usa WHERE
+        ? `AND (
+            (c.deuda_tipo_operacion = 'compra' AND v.fk_empresa = :fk_empresa) 
+            
+          )`
+        : `WHERE 
+            (c.deuda_tipo_operacion = 'compra' AND v.fk_empresa = :fk_empresa) 
+            `;
     }
 
     let sql = `
       SELECT 
-          c.deuda_codigo, 
-          c.deuda_fecha, 
-          c.deuda_monto_total, 
-          c.deuda_estado, 
-          c.deuda_num_cuotas, 
-          c.fk_compra,
-          c2.prov_nombre AS proveedor
-      FROM 
-          deudas c
-      JOIN 
-          compras v ON c.fk_compra = v.com_codigo
-      JOIN 
-          proveedores c2 ON v.fk_proveedor = c2.prov_codigo 
+    c.deuda_codigo, 
+    c.deuda_fecha, 
+    c.deuda_monto_total, 
+    c.deuda_estado, 
+    c.deuda_num_cuotas, 
+    c.deuda_tipo_operacion,
+    c.fk_operacion,
+    CASE 
+        WHEN c.deuda_tipo_operacion = 'compra' THEN v.com_codigo
+--        WHEN c.deuda_tipo_operacion = 'gasto' THEN g.gas_codigo 
+    END AS operacion_codigo,
+    CASE 
+        WHEN c.deuda_tipo_operacion = 'compra' THEN p.prov_nombre
+--        WHEN c.deuda_tipo_operacion = 'gasto' THEN g.gas_descripcion
+    END AS proveedor
+FROM 
+    deudas c
+LEFT JOIN compras v ON c.deuda_tipo_operacion = 'compra' AND c.fk_operacion = v.com_codigo
+LEFT JOIN proveedores p ON v.fk_proveedor = p.prov_codigo
+--LEFT JOIN gastos g ON c.deuda_tipo_operacion = 'gasto' AND c.fk_operacion = g.gas_codigo
       ${queryAdd} ${empresaCondition}
       ORDER BY c.deuda_fecha ASC
       LIMIT ${limit}

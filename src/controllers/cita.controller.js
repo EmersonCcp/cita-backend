@@ -109,13 +109,14 @@ export const updateEstado = async (req, res) => {
       return res.status(400).json({ message: "Estado inválido" });
     }
 
-    const [updatedRows] = await Cita.update({ estado }, { where: { id } });
+    const [updatedRows] = await Cita.update(
+      { cita_estado: estado },
+      { where: { cita_codigo: id } }
+    );
 
     if (updatedRows === 0) {
       return res.status(404).json({ message: "Cita no encontrada" });
     }
-
-    await deleteKeysByPattern(`${Cita.name}:list:fk_empresa=`);
 
     res.json({ ok: true });
   } catch (error) {
@@ -148,33 +149,33 @@ export const createCita = async (req, res) => {
 
       await CitaServicio.bulkCreate(citaServiciosData, { transaction: t });
 
-      console.log(newCita);
-
-      await Cobro.create({
-        cob_estado: 'pendiente',
-            cob_fecha: newCita.cita_fecha,
-            cob_monto_total: newCita.cita_monto,
-            cob_num_cuotas: 1,
-            fk_operacion: newCita.cita_codigo,
-            cob_tipo_operacion: 'cita',
-            fk_empresa
-      },
-      { transaction: t })
+      await Cobro.create(
+        {
+          cob_estado: "pendiente",
+          cob_fecha: newCita.cita_fecha_vencimiento,
+          cob_monto_total: newCita.cita_monto,
+          cob_num_cuotas: newCita.cita_num_cuotas,
+          fk_operacion: newCita.cita_codigo,
+          cob_tipo_operacion: "cita",
+          fk_empresa,
+        },
+        { transaction: t }
+      );
 
       //   // Registrar movimiento en la caja
-        // await MovimientoCaja.create(
-        //   {
-        //     mc_tipo: "ingreso",
-        //     mc_monto: Number(cita.cita_monto),
-        //     mc_descripcion: `citaCOD${newCita.cita_codigo}-ingreso`,
-        //     mc_fecha: cita.cita_fecha,
-        //     fk_operacion: newCita.cita_codigo,
-        //     mc_tipo_operacion: "cita",
-        //     fk_caja: newCita.fk_caja,
-        //     fk_empresa,
-        //   },
-        //   { transaction: t }
-        // );
+      // await MovimientoCaja.create(
+      //   {
+      //     mc_tipo: "ingreso",
+      //     mc_monto: Number(cita.cita_monto),
+      //     mc_descripcion: `citaCOD${newCita.cita_codigo}-ingreso`,
+      //     mc_fecha: cita.cita_fecha,
+      //     fk_operacion: newCita.cita_codigo,
+      //     mc_tipo_operacion: "cita",
+      //     fk_caja: newCita.fk_caja,
+      //     fk_empresa,
+      //   },
+      //   { transaction: t }
+      // );
       // }
     }
 
@@ -242,10 +243,39 @@ export const deleteCita = async (req, res) => {
       return res.status(404).json({ ok: false, message: "Cita no encontrada" });
     }
 
-
     // Eliminar cuotas
     const sqlDeleteCuotas = `DELETE FROM cuotas WHERE cuo_tipo_operacion = 'cita' AND fk_operacion = ${id}`;
     await sequelize.query(sqlDeleteCuotas, {
+      type: QueryTypes.DELETE,
+      transaction,
+    });
+
+    // Devolver saldo a las cajas
+    const sqlDevolverStock = `WITH TotalMovimientos AS (
+      SELECT 
+        fk_caja, 
+        SUM(mc_monto) AS total_monto
+      FROM 
+        movimientos_cajas
+      WHERE 
+        fk_operacion = ${id} 
+      GROUP BY 
+        fk_caja
+    )
+    
+    UPDATE 
+      cajas
+    SET 
+      caja_saldo_actual = caja_saldo_actual - tm.total_monto
+    FROM 
+      TotalMovimientos tm
+    WHERE 
+      cajas.caja_codigo = tm.fk_caja;`;
+    await sequelize.query(sqlDevolverStock, { transaction });
+
+    // Eliminar movimientos de caja
+    const sqlMovimientoCaja = `DELETE FROM movimientos_cajas WHERE fk_operacion = ${id} AND mc_tipo_operacion = 'cita'`;
+    await sequelize.query(sqlMovimientoCaja, {
       type: QueryTypes.DELETE,
       transaction,
     });
