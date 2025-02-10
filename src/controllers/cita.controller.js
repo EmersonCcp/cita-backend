@@ -11,6 +11,7 @@ import { QueryTypes } from "sequelize";
 import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
 import { client } from "../index.js";
 import { Empresa } from "../models/Empresa.js";
+import { Cobro } from "../models/Cobro.js";
 import { Caja } from "../models/Caja.js";
 import { CitaServicio } from "../models/CitaServicio.js";
 import { errorHandler } from "../utils/errorHandler.js";
@@ -149,31 +150,31 @@ export const createCita = async (req, res) => {
 
       console.log(newCita);
 
-      // // Verificar si la cita está completada y actualizar la caja
-      // if (newCita.cita_estado === "completado" && newCita.fk_caja) {
-      //   // Actualizar caja_saldo_actual sumando el total
-      //   await Caja.increment(
-      //     { caja_saldo_actual: Number(cita.cita_monto) },
-      //     {
-      //       where: { caja_codigo: newCita.fk_caja },
-      //       transaction: t,
-      //     }
-      //   );
+      await Cobro.create({
+        cob_estado: 'pendiente',
+            cob_fecha: newCita.cita_fecha,
+            cob_monto_total: newCita.cita_monto,
+            cob_num_cuotas: 1,
+            fk_operacion: newCita.cita_codigo,
+            cob_tipo_operacion: 'cita',
+            fk_empresa
+      },
+      { transaction: t })
 
       //   // Registrar movimiento en la caja
-      //   await MovimientoCaja.create(
-      //     {
-      //       mc_tipo: "ingreso",
-      //       mc_monto: Number(cita.cita_monto),
-      //       mc_descripcion: `citaCOD${newCita.cita_codigo}-ingreso`,
-      //       mc_fecha: cita.cita_fecha,
-      //       fk_operacion: newCita.cita_codigo,
-      //       mc_tipo_operacion: "cita",
-      //       fk_caja: newCita.fk_caja,
-      //       fk_empresa,
-      //     },
-      //     { transaction: t }
-      //   );
+        // await MovimientoCaja.create(
+        //   {
+        //     mc_tipo: "ingreso",
+        //     mc_monto: Number(cita.cita_monto),
+        //     mc_descripcion: `citaCOD${newCita.cita_codigo}-ingreso`,
+        //     mc_fecha: cita.cita_fecha,
+        //     fk_operacion: newCita.cita_codigo,
+        //     mc_tipo_operacion: "cita",
+        //     fk_caja: newCita.fk_caja,
+        //     fk_empresa,
+        //   },
+        //   { transaction: t }
+        // );
       // }
     }
 
@@ -241,8 +242,11 @@ export const deleteCita = async (req, res) => {
       return res.status(404).json({ ok: false, message: "Cita no encontrada" });
     }
 
-    await MovimientoCaja.destroy({
-      where: { fk_operacion: id, mc_tipo_operacion: "cita", fk_empresa },
+
+    // Eliminar cuotas
+    const sqlDeleteCuotas = `DELETE FROM cuotas WHERE cuo_tipo_operacion = 'cita' AND fk_operacion = ${id}`;
+    await sequelize.query(sqlDeleteCuotas, {
+      type: QueryTypes.DELETE,
       transaction,
     });
 

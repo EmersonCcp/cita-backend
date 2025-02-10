@@ -32,7 +32,7 @@ export const Cobro = sequelize.define("cobros", {
   },
 
   cob_tipo_operacion: {
-    // Tipo de operación: "venta" o "compra" o "cita"
+    // Tipo de operación: "venta"  o "cita"
     type: DataTypes.STRING,
     allowNull: false,
   },
