@@ -8,81 +8,70 @@ import { Cliente } from "../models/Cliente.js";
 import { Notificacion } from "../models/Notificacion.js";
 import { sendNotification } from "../app.js";
 import moment from "moment-timezone";
+import { sequelize } from "../database/database.js";
 
 const formatDate = (date) => {
   return date.toISOString().split("T")[0];
 };
 
-cron.schedule("*/30 * * * * *", () => {
-  console.log("Tarea ejecutada cada una hora, Verifica el Estado del Titular");
-});
+const scheduleCitaNotification = () => {
+  cron.schedule("0 7 * * *", async () => {
+    console.log(`Cron job ejecutado: Verificando citas próximas a vencer...`);
 
-// const scheduleCitaNotification = () => {
-//   cron.schedule("*/10 * * * * *", async () => {
-//     console.log(`Cron job ejecutado: Verificando citas próximas a vencer...`);
+    console.log("Ejecutando cron job para verificar citas de mañana...");
 
-//     try {
-//       // Fecha actual
-//       const currentDate = moment()
-//         .tz("America/Asuncion")
-//         .startOf("day")
-//         .toDate();
-//       // Fecha objetivo: un día después
-//       const targetDate = new Date(currentDate);
-//       targetDate.setDate(currentDate.getDate() + 1);
+    try {
+      // Obtener la fecha de mañana en formato YYYY-MM-DD
+      const fechaManana = moment().add(1, "days").format("YYYY-MM-DD");
 
-//       const targetDateString = formatDate(targetDate);
+      // Buscar citas programadas para mañana
+      const citas = await sequelize.query(
+        `SELECT 
+                              c.cita_codigo,
+                              c.cita_fecha,
+                              c.cita_estado,
+                              c.cita_hora,
+                              cl.cli_nombre,
+                              cl.cli_apellido,
+                              cl.fk_empresa
+                          FROM citas c
+                          JOIN clientes cl ON c.fk_cliente = cl.cli_codigo
+                          WHERE TO_DATE(c.cita_fecha, 'YYYY-MM-DD') = CURRENT_DATE + INTERVAL '1 day';`,
+        { type: sequelize.QueryTypes.SELECT }
+      );
 
-//       // Obtener todas las citas cuya fecha es igual a la fecha objetivo
-//       const citas = await Cita.findAll({
-//         where: Sequelize.where(
-//           Sequelize.fn("DATE", Sequelize.col("cita_fecha")),
-//           targetDateString
-//         ),
-//       });
+      if (citas.length === 0) {
+        console.log("No hay citas programadas para mañana.");
+        return;
+      }
 
-//       // Iterar sobre las citas y enviar notificaciones
-//       for (const cita of citas) {
-//         const citaData = cita.get();
+      console.log(`Se encontraron ${citas.length} citas para mañana.`);
 
-//         let cliente = await Cliente.findOne({
-//           where: { cli_codigo: citaData.fk_cliente },
-//         });
+      // Crear notificaciones para cada cita encontrada
+      const notificaciones = citas.map((cita) => {
+        const mensaje = `${cita.cli_nombre} ${cita.cli_apellido} Tiene una cita programada para ${fechaManana} a las ${cita.cita_hora}.`;
 
-//         const clienteData = cliente.get();
+        // Crear el objeto de notificación
+        const notificacion = {
+          noti_mensaje: mensaje,
+          noti_rango: 1, // Puedes definir el rango según la prioridad
+          fk_empresa: cita.fk_empresa,
+        };
 
-//         let funcionario = await Funcionario.findOne({
-//           where: { fun_codigo: citaData.fk_funcionario },
-//         });
+        // Llamar al método senNotification para enviar la notificación
+        sendNotification(notificacion);
 
-//         const funcionarioData = funcionario.get();
+        return notificacion;
+      });
 
-//         const clienteNombre = `${clienteData.cli_nombre} ${clienteData.cli_apellido}`;
-//         const funcionarioNombre = `${funcionarioData.fun_nombre} ${funcionarioData.fun_apellido}`;
+      // Guardar notificaciones en la base de datos
+      await Notificacion.bulkCreate(notificaciones);
 
-//         const mensaje = `Recordatorio: ${funcionarioNombre}, Tienes una cita con ${clienteNombre} el ${citaData.cita_fecha} a las ${citaData.cita_hora}.`;
+      console.log("Notificaciones creadas exitosamente.");
+    } catch (error) {
+      console.error("Error al ejecutar el cron job:", error);
+    }
+  });
+};
 
-//         // Crear una notificación
-//         let notificacion = await Notificacion.create({
-//           noti_mensaje: mensaje,
-//           noti_visto: false,
-//           //   cita_codigo: cita.cita_codigo,
-//           noti_rango: 0,
-//         });
-
-//         // Aquí puedes implementar la función para enviar notificaciones, ya sea por correo o push
-//         sendNotification(notificacion);
-
-//         // console.log(
-//         //   `---------Notificación creada para la cita con ${clienteNombre} el ${fechaCita} a las ${horaCita}---------`
-//         // );
-//       }
-
-//       console.log("Verificación de citas completada.");
-//     } catch (error) {
-//       console.error("Error al verificar citas próximas:", error);
-//     }
-//   });
-// };
-
-// scheduleCitaNotification();
+scheduleCitaNotification();

@@ -1,5 +1,5 @@
 import { Notificacion } from "../models/Notificacion.js";
-import { io } from "../app.js";
+import { io, sendNotification, updateNotifi } from "../app.js";
 
 export const getNotificaciones = async (req, res) => {
   try {
@@ -67,11 +67,12 @@ export const deleteNotificacion = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const notificacion = await Documento.destroy({
+    const notificacion = await Notificacion.destroy({
       where: { noti_codigo: id },
     });
 
     if (notificacion > 0) {
+      updateNotifi(notificacion);
       res.status(200).json({ ok: true });
     } else {
       res.status(200).json({

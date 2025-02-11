@@ -15,6 +15,7 @@ import { client } from "../index.js";
 import { Empresa } from "../models/Empresa.js";
 import { DetalleVenta } from "../models/DetalleVenta.js";
 import { Producto } from "../models/Producto.js";
+import { Cobro } from "../models/Cobro.js";
 
 export const getVentas = async (req, res) => {
   try {
@@ -184,6 +185,11 @@ export const deleteVenta = async (req, res) => {
     const sqlMovimientoCaja = `DELETE FROM movimientos_cajas WHERE fk_operacion = ${id} AND mc_tipo_operacion = 'venta'`;
     await sequelize.query(sqlMovimientoCaja, {
       type: QueryTypes.DELETE,
+      transaction,
+    });
+
+    await Cobro.destroy({
+      where: { fk_operacion: id, cob_tipo_operacion: "venta" },
       transaction,
     });
 

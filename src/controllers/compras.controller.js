@@ -1,19 +1,12 @@
 import { QueryTypes } from "sequelize";
 import { Compra } from "../models/Compra.js";
+import { Deuda } from "../models/Deuda.js";
 import { Empresa } from "../models/Empresa.js";
 import { Producto } from "../models/Producto.js";
 import { DetalleCompra } from "../models/DetalleCompra.js";
 import { errorHandler } from "../utils/errorHandler.js";
-import { deleteKeysByPattern } from "../middleware/redisMiddleware.js";
-import {
-  getAllWithSearch,
-  getOne,
-  create,
-  update,
-  remove,
-} from "../utils/crudController.js";
+import { getOne, create, update, remove } from "../utils/crudController.js";
 import { sequelize } from "../database/database.js";
-import { client } from "../index.js";
 
 export const getCompras = async (req, res) => {
   try {
@@ -182,6 +175,11 @@ export const deleteCompra = async (req, res) => {
     const sqlMovimientoCaja = `DELETE FROM movimientos_cajas WHERE fk_operacion = ${id} AND mc_tipo_operacion = 'compra'`;
     await sequelize.query(sqlMovimientoCaja, {
       type: QueryTypes.DELETE,
+      transaction,
+    });
+
+    await Deuda.destroy({
+      where: { fk_operacion: id, deuda_tipo_operacion: "compra" },
       transaction,
     });
 

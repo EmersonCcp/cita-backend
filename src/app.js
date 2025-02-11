@@ -6,7 +6,7 @@ import cors from "cors";
 import responseTime from "response-time";
 
 //cronjob
-// import "./cronjobs/citasNotification.js";
+import "./cronjobs/citasNotification.js";
 // import "./cronjobs/cumpleClientes.js";
 
 //middleware
@@ -48,6 +48,10 @@ export const stateEmpresa = (message) => {
 // Ejemplo de enviar notificación
 export const sendNotification = (message) => {
   io.emit("nuevaNotificacion", message);
+};
+
+export const updateNotifi = (message) => {
+  io.emit("notificacionActualizada", message);
 };
 
 export const updateListProyectos = (message) => {

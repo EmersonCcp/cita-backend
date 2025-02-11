@@ -152,7 +152,9 @@ export const createCita = async (req, res) => {
       await Cobro.create(
         {
           cob_estado: "pendiente",
-          cob_fecha: newCita.cita_fecha_vencimiento,
+          cob_fecha: newCita.cita_fecha_vencimiento
+            ? newCita.cita_fecha_vencimiento
+            : newCita.cita_fecha,
           cob_monto_total: newCita.cita_monto,
           cob_num_cuotas: newCita.cita_num_cuotas,
           fk_operacion: newCita.cita_codigo,
@@ -161,22 +163,6 @@ export const createCita = async (req, res) => {
         },
         { transaction: t }
       );
-
-      //   // Registrar movimiento en la caja
-      // await MovimientoCaja.create(
-      //   {
-      //     mc_tipo: "ingreso",
-      //     mc_monto: Number(cita.cita_monto),
-      //     mc_descripcion: `citaCOD${newCita.cita_codigo}-ingreso`,
-      //     mc_fecha: cita.cita_fecha,
-      //     fk_operacion: newCita.cita_codigo,
-      //     mc_tipo_operacion: "cita",
-      //     fk_caja: newCita.fk_caja,
-      //     fk_empresa,
-      //   },
-      //   { transaction: t }
-      // );
-      // }
     }
 
     await t.commit();
@@ -282,6 +268,11 @@ export const deleteCita = async (req, res) => {
 
     await CitaServicio.destroy({
       where: { fk_cita: id, fk_empresa },
+      transaction,
+    });
+
+    await Cobro.destroy({
+      where: { fk_operacion: id, cob_tipo_operacion: "cita" },
       transaction,
     });
 
