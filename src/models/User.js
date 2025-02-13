@@ -9,6 +9,7 @@ const rolesEnum = [
   "ASISTENCIAS",
   "SERVICIOS",
   "CITAS",
+  "GASTOS",
   "PROVEEDORES",
   "PRODUCTOS",
   "COMPRAS",

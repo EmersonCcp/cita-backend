@@ -48,10 +48,14 @@ export const getDeudasWithSearch = async (req, res) => {
       empresaCondition = queryAdd
         ? `AND (
             (c.deuda_tipo_operacion = 'compra' AND v.fk_empresa = :fk_empresa) 
+            OR 
+            (c.deuda_tipo_operacion = 'gasto' AND g.fk_empresa = :fk_empresa)
             
           )`
         : `WHERE 
             (c.deuda_tipo_operacion = 'compra' AND v.fk_empresa = :fk_empresa) 
+            OR 
+            (c.deuda_tipo_operacion = 'gasto' AND g.fk_empresa = :fk_empresa)
             `;
     }
 
@@ -66,17 +70,18 @@ export const getDeudasWithSearch = async (req, res) => {
     c.fk_operacion,
     CASE 
         WHEN c.deuda_tipo_operacion = 'compra' THEN v.com_codigo
---        WHEN c.deuda_tipo_operacion = 'gasto' THEN g.gas_codigo 
+        WHEN c.deuda_tipo_operacion = 'gasto' THEN g.gas_codigo 
     END AS operacion_codigo,
     CASE 
         WHEN c.deuda_tipo_operacion = 'compra' THEN p.prov_nombre
---        WHEN c.deuda_tipo_operacion = 'gasto' THEN g.gas_descripcion
+       WHEN c.deuda_tipo_operacion = 'gasto' THEN pv.prov_nombre
     END AS proveedor
 FROM 
     deudas c
 LEFT JOIN compras v ON c.deuda_tipo_operacion = 'compra' AND c.fk_operacion = v.com_codigo
 LEFT JOIN proveedores p ON v.fk_proveedor = p.prov_codigo
---LEFT JOIN gastos g ON c.deuda_tipo_operacion = 'gasto' AND c.fk_operacion = g.gas_codigo
+LEFT JOIN gastos g ON c.deuda_tipo_operacion = 'gasto' AND c.fk_operacion = g.gas_codigo
+LEFT JOIN proveedores pv ON g.fk_proveedor = pv.prov_codigo
       ${queryAdd} ${empresaCondition}
       ORDER BY c.deuda_fecha ASC
       LIMIT ${limit}

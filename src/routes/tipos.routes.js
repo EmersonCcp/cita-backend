@@ -10,7 +10,7 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.get(
-  "/tipos/:fk_empresa/:limit/:pagination/:query",
+  "/tipos/:fk_empresa/:sigla/:limit/:pagination/:query",
   authenticateToken,
   getEntities
 );

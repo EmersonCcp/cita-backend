@@ -32,6 +32,8 @@ import asistenciasRoutes from "./asistencias.routes.js";
 // import detallesFabricacionesRoutes from "./detalle_fabricaciones.routes.js";
 import tiposRoutes from "./tipos.routes.js";
 // import tareaProductoRoutes from "./tarea_productos.routes.js";
+import gastosRoutes from "./gastos.routes.js";
+import presupuestosRoutes from "./presupuestos.routes.js";
 
 const router = Router();
 
@@ -67,6 +69,8 @@ router.use("/v1/api", asistenciasRoutes);
 // router.use("/v1/api", fabricacionesRoutes);
 // router.use("/v1/api", detallesFabricacionesRoutes);
 router.use("/v1/api", tiposRoutes);
+router.use("/v1/api", gastosRoutes);
+router.use("/v1/api", presupuestosRoutes);
 // router.use("/v1/api", tareaProductoRoutes);
 
 export default router;

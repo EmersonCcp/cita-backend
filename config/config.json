@@ -1,11 +1,11 @@
 {
   "development": {
     "username": "postgres",
-    "password": "9014",
-    "database": "ensystem",
-    "host": "postgres12",
+    "password": "EhMKCrBFTtEmthCujeXXtNineaUAYpfQ",
+    "database": "railway",
+    "host": "junction.proxy.rlwy.net",
     "dialect": "postgres",
-    "port": "5432"
+    "port": "54832"
   },
   "test": {
     "username": "root",

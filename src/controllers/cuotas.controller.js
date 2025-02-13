@@ -92,7 +92,10 @@ export const createCuota = async (req, res) => {
 
     // Calculamos el nuevo saldo
     const saldoActual = Number(caja.caja_saldo_actual || 0);
-    if (item.cuo_tipo_operacion === "compra") {
+    if (
+      item.cuo_tipo_operacion === "compra" ||
+      item.cuo_tipo_operacion === "gasto"
+    ) {
       caja.caja_saldo_actual = saldoActual - Number(item.cuo_monto);
     } else {
       caja.caja_saldo_actual = saldoActual + Number(item.cuo_monto);
