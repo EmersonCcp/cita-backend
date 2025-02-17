@@ -32,6 +32,12 @@ export const Pago = sequelize.define("pagos", {
     allowNull: true,
   },
 
+  pago_tipo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "vale",
+  },
+
   fk_empresa: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -43,4 +49,4 @@ export const Pago = sequelize.define("pagos", {
   },
 });
 
-Pago.sync({ alter: false });
+Pago.sync({ alter: true });

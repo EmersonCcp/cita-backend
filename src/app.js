@@ -6,7 +6,7 @@ import cors from "cors";
 import responseTime from "response-time";
 
 //cronjob
-import "./cronjobs/citasNotification.js";
+// import "./cronjobs/citasNotification.js";
 // import "./cronjobs/cumpleClientes.js";
 
 //middleware
