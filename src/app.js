@@ -17,13 +17,20 @@ const app = express();
 
 export const server = http.createServer(app);
 
+const corsOptions = {
+  origin: ["*"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 const io = new WebSocketServer(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(responseTime());
 app.use(logger);
 app.get("/serve", (req, res) => {
