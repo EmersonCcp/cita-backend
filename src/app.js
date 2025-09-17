@@ -18,9 +18,10 @@ const app = express();
 export const server = http.createServer(app);
 
 const corsOptions = {
-  origin: ["*"],
+  origin: ["http://localhost:4200", "https://ensystem.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 };
 
 const io = new WebSocketServer(server, {
